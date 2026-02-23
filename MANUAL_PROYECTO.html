@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual del Proyecto - Satélite Peru App MIBUS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #FF9800;
+            padding-bottom: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .date {
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        h2 {
+            font-size: 1.8em;
+            color: #FF9800;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-left: 4px solid #FF9800;
+            padding-left: 15px;
+        }
+        
+        h3 {
+            font-size: 1.3em;
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        h4 {
+            font-size: 1.1em;
+            color: #555;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .structure {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        table th {
+            background: #FF9800;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .box {
+            background: #FFFDE7;
+            border-left: 4px solid #FF9800;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .box strong {
+            color: #FF9800;
+        }
+        
+        .feature-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .feature-item {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 3px solid #FF9800;
+        }
+        
+        .feature-item strong {
+            color: #FF9800;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .flow-diagram {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+            text-align: center;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .flow-step {
+            display: inline-block;
+            background: #FF9800;
+            color: white;
+            padding: 12px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .arrow {
+            display: inline-block;
+            margin: 0 5px;
+            font-size: 1.2em;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #999;
+            font-size: 0.9em;
+        }
+        
+        .section-number {
+            display: inline-block;
+            background: #FF9800;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .print-note {
+            background: #E3F2FD;
+            border: 1px solid #2196F3;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 20px 0;
+            color: #1565C0;
+            font-size: 0.95em;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 30px;
+            }
+            
+            h2 {
+                page-break-after: avoid;
+            }
+            
+            h3, h4 {
+                page-break-after: avoid;
+            }
+            
+            p, ul, ol {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>🛰️ SATÉLITE PERU APP MIBUS</h1>
+            <p>Manual Técnico y Guía de Arquitectura del Proyecto</p>
+            <div class="date">Documento generado: Febrero 20, 2026</div>
+        </div>
+
+        <div class="print-note">
+            <strong>💡 Nota:</strong> Este documento proporciona una visión completa de la arquitectura, estructura y componentes principales del proyecto.
+        </div>
+
+        <!-- TABLA DE CONTENIDOS -->
+        <h2>Tabla de Contenidos</h2>
+        <ol>
+            <li><a href="#arquitectura">Estructura y Arquitectura</a></li>
+            <li><a href="#componentes">Componentes Principales</a></li>
+            <li><a href="#pantallas">Pantallas de la Aplicación</a></li>
+            <li><a href="#mqtt">Comunicación MQTT</a></li>
+            <li><a href="#tema">Tema y Estilos</a></li>
+            <li><a href="#dependencias">Dependencias Importantes</a></li>
+            <li><a href="#consideraciones">Consideraciones Importantes</a></li>
+            <li><a href="#flujo">Flujo Principal</a></li>
+            <li><a href="#checklist">Checklist de Desarrollo</a></li>
+        </ol>
+
+        <!-- SECCIÓN 1: ARQUITECTURA -->
+        <h2 id="arquitectura"><span class="section-number">1</span>Estructura y Arquitectura</h2>
+        
+        <h3>Arquitectura General</h3>
+        <p>El proyecto implementa una <strong>arquitectura por capas limpia</strong> que separa claramente las responsabilidades en tres niveles:</p>
+        
+        <div class="feature-list">
+            <div class="feature-item">
+                <strong>🗄️ Data Layer</strong>
+                Acceso a datos, servicios y configuración
+            </div>
+            <div class="feature-item">
+                <strong>🎯 Domain Layer</strong>
+                Modelos de datos puros e independientes
+            </div>
+            <div class="feature-item">
+                <strong>🎨 Presentation Layer</strong>
+                Interfaz de usuario y pantallas
+            </div>
+        </div>
+
+        <h3>Estructura de Carpetas</h3>
+        <div class="structure">lib/
+├── main.dart                    # Punto de entrada de la app
+├── app_theme.dart              # Tema y estilos globales
+│
+├── data/                        # CAPA DE DATOS
+│   ├── blocs/                   # Gestión de estados (GPS)
+│   │   └── gps/               # BLoC para ubicación
+│   ├── services/                # Servicios principales
+│   │   ├── auth_service.dart    # Autenticación
+│   │   ├── mqtt_service.dart    # MQTT en tiempo real
+│   │   ├── cars_service.dart    # Gestión de vehículos
+│   │   └── reports_service.dart # Reportes
+│   ├── config/
+│   │   └── router/              # Configuración de rutas
+│   └── global/
+│       └── environment.dart     # Variables de ambiente
+│
+├── domains/                     # CAPA DE DOMINIO
+│   └── models/                  # Modelos de datos
+│       ├── authmodels/          # Modelos de autenticación
+│       ├── autos_models/        # Modelos de vehículos
+│       └── directions/          # Modelos de direcciones
+│
+└── presentation/                # CAPA DE PRESENTACIÓN
+    ├── screens/                 # Pantallas principales
+    │   ├── auth/                # Pantallas de autenticación
+    │   ├── home/                # Dashboard principal
+    │   ├── mapa/                # Pantalla de mapas
+    │   ├── reports/             # Pantalla de reportes
+    │   ├── history/             # Historial
+    │   └── about/               # Acerca de
+    ├── components/              # Componentes reutilizables
+    ├── custom_drawer/           # Navegación lateral
+    └── utils/                   # Utilidades
+        </div>
+
+        <!-- SECCIÓN 2: COMPONENTES PRINCIPALES -->
+        <h2 id="componentes"><span class="section-number">2</span>Componentes Principales</h2>
+
+        <h3>Gestión de Estado y Dependencias</h3>
+        
+        <div class="box">
+            <strong>Provider (^6.1.2):</strong> Sistema de inyección de dependencias y gestión reactiva de estado. Se utiliza para:
+            <ul>
+                <li>Providores de servicios (Auth, Cars, Reports)</li>
+                <li>Acceso global a datos de aplicación</li>
+                <li>Notificación de cambios a widgets</li>
+            </ul>
+        </div>
+
+        <div class="box">
+            <strong>BLoC (^8.1.5):</strong> Para lógica de negocio compleja, especialmente:
+            <ul>
+                <li>GpsBloc: Gestión de ubicación en tiempo real</li>
+                <li>Manejo de eventos y estados</li>
+                <li>Separación clara de lógica de presentación</li>
+            </ul>
+        </div>
+
+        <h3>Servicios Críticos</h3>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Servicio</th>
+                    <th>Responsabilidad</th>
+                    <th>Ubicación</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>AuthService</strong></td>
+                    <td>Autenticación, login, token JWT, validación de sesión</td>
+                    <td>data/services/</td>
+                </tr>
+                <tr>
+                    <td><strong>MqttService</strong></td>
+                    <td>Conexión MQTT, suscripción a tópicos, streaming de datos en tiempo real</td>
+                    <td>data/services/</td>
+                </tr>
+                <tr>
+                    <td><strong>CarsService</strong></td>
+                    <td>Gestión de vehículos, datos de buses, información de flota</td>
+                    <td>data/services/</td>
+                </tr>
+                <tr>
+                    <td><strong>ReportsService</strong></td>
+                    <td>Generación de reportes, exportación PDF/Excel, análisis de datos</td>
+                    <td>data/services/</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- SECCIÓN 3: PANTALLAS -->
+        <h2 id="pantallas"><span class="section-number">3</span>Pantallas de la Aplicación</h2>
+
+        <h3>Flujo de Navegación</h3>
+        
+        <div class="feature-list">
+            <div class="feature-item">
+                <strong>📱 LoadingScreen</strong>
+                Pantalla inicial de carga con splash screen
+            </div>
+            <div class="feature-item">
+                <strong>🔐 LoginScreen</strong>
+                Autenticación de usuario con credenciales
+            </div>
+            <div class="feature-item">
+                <strong>🏠 HomeScreen</strong>
+                Dashboard principal con información general
+            </div>
+            <div class="feature-item">
+                <strong>🗺️ BusMapView</strong>
+                Mapa interactivo con ubicación de buses en tiempo real
+            </div>
+            <div class="feature-item">
+                <strong>📊 BusReportScreen</strong>
+                Reportes y análisis de vehículos
+            </div>
+            <div class="feature-item">
+                <strong>📈 BusMapHistorial</strong>
+                Historial de ubicaciones y movimientos
+            </div>
+        </div>
+
+        <h3>Enrutamiento</h3>
+        <p>La aplicación utiliza <strong>go_router (^14.1.1)</strong> para enrutamiento declarativo. El archivo de configuración se encuentra en:</p>
+        <div class="structure">lib/data/config/router/router.dart</div>
+
+        <!-- SECCIÓN 4: MQTT -->
+        <h2 id="mqtt"><span class="section-number">4</span>Comunicación MQTT en Tiempo Real</h2>
+
+        <h3>Configuración del Broker</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Parámetro</th>
+                    <th>Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Host</strong></td>
+                    <td>satelitem2m.pe</td>
+                </tr>
+                <tr>
+                    <td><strong>Puerto</strong></td>
+                    <td>1883</td>
+                </tr>
+                <tr>
+                    <td><strong>Protocolo</strong></td>
+                    <td>MQTT v3.1.1</td>
+                </tr>
+                <tr>
+                    <td><strong>Keep Alive</strong></td>
+                    <td>60 segundos</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Características Principales</h3>
+        <ul>
+            <li><strong>Conexión Automática:</strong> Intenta conectar automáticamente al iniciar</li>
+            <li><strong>Reconexión:</strong> Reconecta automáticamente si se pierde la conexión</li>
+            <li><strong>Suscripción a Tópicos:</strong> Recibe datos en tiempo real de ubicaciones</li>
+            <li><strong>Stream de Datos:</strong> Proporciona un Stream para escuchar cambios</li>
+            <li><strong>Manejo de Estados:</strong> Notifica conexión, desconexión y errores</li>
+        </ul>
+
+        <div class="box">
+            <strong>⚠️ IMPORTANTE:</strong> El servicio MQTT está configurado como Provider en main.dart y se conecta automáticamente al iniciar la aplicación. Las credenciales están en auth en la clase MqttService.
+        </div>
+
+        <!-- SECCIÓN 5: TEMA -->
+        <h2 id="tema"><span class="section-number">5</span>Tema y Estilos</h2>
+
+        <h3>Configuración Visual</h3>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Elemento</th>
+                    <th>Configuración</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Fuente Principal</strong></td>
+                    <td>Ubuntu (Google Fonts)</td>
+                </tr>
+                <tr>
+                    <td><strong>Tema</strong></td>
+                    <td>Material Design con colores oscuros</td>
+                </tr>
+                <tr>
+                    <td><strong>Color Primario</strong></td>
+                    <td>#FF9800 (Naranja)</td>
+                </tr>
+                <tr>
+                    <td><strong>Color Secundario</strong></td>
+                    <td>Orange</td>
+                </tr>
+                <tr>
+                    <td><strong>Idioma</strong></td>
+                    <td>Español (ES)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Archivo de Tema</h3>
+        <p>Los estilos y colores de la aplicación se definen en <strong>lib/app_theme.dart</strong>. Este archivo contiene:</p>
+        <ul>
+            <li>Paleta de colores personalizada</li>
+            <li>Define de estilos de texto</li>
+            <li>TextTheme para consistencia</li>
+            <li>Colores específicos para componentes</li>
+        </ul>
+
+        <!-- SECCIÓN 6: DEPENDENCIAS -->
+        <h2 id="dependencias"><span class="section-number">6</span>Dependencias Importantes</h2>
+
+        <h3>Mapas y Geolocalización</h3>
+        <div class="feature-list">
+            <div class="feature-item">
+                <strong>google_maps_flutter</strong><br>
+                Mapas interactivos con Google Maps
+            </div>
+            <div class="feature-item">
+                <strong>flutter_map</strong><br>
+                Alternativa de código abierto para mapas
+            </div>
+            <div class="feature-item">
+                <strong>geolocator</strong><br>
+                Obtención de ubicación GPS del dispositivo
+            </div>
+            <div class="feature-item">
+                <strong>geocoding</strong><br>
+                Conversión de coordenadas a direcciones
+            </div>
+        </div>
+
+        <h3>Interfaz de Usuario</h3>
+        <ul>
+            <li><strong>flutter_svg:</strong> Renderizar archivos SVG</li>
+            <li><strong>animate_do:</strong> Animaciones predefinidas</li>
+            <li><strong>eva_icons_flutter:</strong> Iconos elegantes</li>
+            <li><strong>skeleton_loader:</strong> Loading states atractivos</li>
+            <li><strong>google_fonts:</strong> Fuentes de Google</li>
+        </ul>
+
+        <h3>Datos y Reportes</h3>
+        <ul>
+            <li><strong>dio:</strong> HTTP requests (alternativa a http)</li>
+            <li><strong>pdf:</strong> Generación de archivos PDF</li>
+            <li><strong>excel:</strong> Generación de archivos Excel</li>
+            <li><strong>intl:</strong> Internacionalización y formato de fechas</li>
+        </ul>
+
+        <h3>Persistencia Local</h3>
+        <ul>
+            <li><strong>shared_preferences:</strong> Almacenamiento de preferencias simples</li>
+            <li><strong>flutter_secure_storage:</strong> Almacenamiento seguro de credenciales</li>
+            <li><strong>path_provider:</strong> Acceso a directorios del sistema</li>
+        </ul>
+
+        <h3>Conectividad y Comunicación</h3>
+        <ul>
+            <li><strong>connectivity_plus:</strong> Detectar estado de conexión</li>
+            <li><strong>mqtt_client:</strong> Protocolo MQTT para comunicación IoT</li>
+            <li><strong>jwt_decoder:</strong> Decodificación de tokens JWT</li>
+        </ul>
+
+        <!-- SECCIÓN 7: CONSIDERACIONES -->
+        <h2 id="consideraciones"><span class="section-number">7</span>Consideraciones Importantes</h2>
+
+        <h3>1. Autenticación y Tokens JWT</h3>
+        <div class="box">
+            <ul>
+                <li>La autenticación se maneja en <strong>AuthService</strong></li>
+                <li>Los tokens JWT se validan con <strong>jwt_decoder</strong></li>
+                <li>Se almacenan en <strong>Secure Storage</strong> (no en SharedPreferences)</li>
+                <li>Verificar expiración de tokens antes de hacer peticiones</li>
+                <li>Implementar refresh token si está disponible en el backend</li>
+            </ul>
+        </div>
+
+        <h3>2. Permisos Requeridos</h3>
+        <div class="box">
+            <strong>Android & iOS necesitan los siguientes permisos:</strong>
+            <ul>
+                <li>📍 <strong>GPS / Fine Location:</strong> Para localización en tiempo real</li>
+                <li>📷 <strong>Cámara:</strong> Para capturar fotos y seleccionar imágenes</li>
+                <li>💾 <strong>Almacenamiento:</strong> Para descargar reportes PDF/Excel</li>
+                <li>🌐 <strong>Internet:</strong> Para comunicación con servidor</li>
+            </ul>
+            <p>Usar <strong>permission_handler (^11.3.1)</strong> para solicitar permisos de forma elegante.</p>
+        </div>
+
+        <h3>3. Conectividad</h3>
+        <div class="box">
+            <ul>
+                <li>La aplicación requiere conectividad <strong>constante a internet</strong></li>
+                <li>MQTT requiere conexión estable para actualizaciones en tiempo real</li>
+                <li>Usar <strong>connectivity_plus</strong> para validar conexión antes de peticiones</li>
+                <li>Implementar offline mode o caché si es necesario</li>
+            </ul>
+        </div>
+
+        <h3>4. Variables de Ambiente</h3>
+        <div class="box">
+            <p>Configuradas en: <strong>lib/data/global/environment.dart</strong></p>
+            <ul>
+                <li>URLs de APIs</li>
+                <li>Credenciales de servicios</li>
+                <li>Configuraciones específicas por entorno (dev, prod)</li>
+            </ul>
+        </div>
+
+        <h3>5. Compilación Android</h3>
+        <div class="box">
+            <ul>
+                <li><strong>Gradle:</strong> 8.11.1</li>
+                <li><strong>Min SDK:</strong> API 21 (Android 5.0)</li>
+                <li><strong>Requiere:</strong> Google Maps API Key configurada</li>
+                <li><strong>Ubicación:</strong> android/app/build.gradle</li>
+            </ul>
+        </div>
+
+        <h3>6. API Keys Necesarias</h3>
+        <div class="box">
+            <ul>
+                <li><strong>Google Maps:</strong> Para visualizar mapas interactivos</li>
+                <li><strong>Broker MQTT:</strong> satelitem2m.pe (usuario/contraseña en el código)</li>
+                <li><strong>APIs Backend:</strong> Configuradas en environment.dart</li>
+            </ul>
+        </div>
+
+        <!-- SECCIÓN 8: FLUJO PRINCIPAL -->
+        <h2 id="flujo"><span class="section-number">8</span>Flujo Principal de la Aplicación</h2>
+
+        <div class="flow-diagram">
+            <div class="flow-step">Loading Screen</div>
+            <div class="arrow">↓</div>
+            <br><br>
+            <div class="flow-step">Login Screen</div>
+            <div class="arrow">↓</div>
+            <br><br>
+            <div class="flow-step">Home Screen (Dashboard)</div>
+            <div class="arrow">↓↓</div>
+            <br><br>
+            <div style="display: inline-block; vertical-align: top;">
+                <div class="flow-step" style="display: block; margin-bottom: 10px;">Map View</div>
+                <div style="font-size: 0.9em; margin-top: 5px;">(Buses en tiempo real)</div>
+            </div>
+            <div style="display: inline-block; margin: 0 20px;">┃</div>
+            <div style="display: inline-block; vertical-align: top;">
+                <div class="flow-step" style="display: block; margin-bottom: 10px;">Reports</div>
+                <div style="font-size: 0.9em; margin-top: 5px;">(Históricos y análisis)</div>
+            </div>
+            <div style="display: inline-block; margin: 0 20px;">┃</div>
+            <div style="display: inline-block; vertical-align: top;">
+                <div class="flow-step" style="display: block; margin-bottom: 10px;">History</div>
+                <div style="font-size: 0.9em; margin-top: 5px;">(Trazos GPS)</div>
+            </div>
+        </div>
+
+        <h3>Descripción del Flujo</h3>
+        <ol>
+            <li><strong>Loading Screen:</strong> Inicializa la aplicación y verifica si hay sesión activa</li>
+            <li><strong>Login Screen:</strong> Si no hay sesión, autentica al usuario con credenciales</li>
+            <li><strong>Home Screen:</strong> Dashboard principal con opciones de navegación</li>
+            <li><strong>Submódulos:</strong> Usuario puede navegar entre:
+                <ul>
+                    <li><strong>Map View:</strong> Ver ubicación de buses en tiempo real vía MQTT</li>
+                    <li><strong>Reports:</strong> Generar y descargar reportes PDF/Excel</li>
+                    <li><strong>History:</strong> Ver historial de movimientos de vehículos</li>
+                </ul>
+            </li>
+        </ol>
+
+        <!-- SECCIÓN 9: CHECKLIST -->
+        <h2 id="checklist"><span class="section-number">9</span>Checklist de Desarrollo</h2>
+
+        <h3>Antes de Empezar</h3>
+        <ol>
+            <li>☐ Instalar Flutter 3.13.4+ (verificar versión)</li>
+            <li>☐ Configurar Android SDK (Min API 21)</li>
+            <li>☐ Configurar iOS deployment target (si es para iOS)</li>
+            <li>☐ Configurar Google Maps API Key</li>
+            <li>☐ Obtener credenciales del broker MQTT</li>
+            <li>☐ Configurar URLs del backend en environment.dart</li>
+        </ol>
+
+        <h3>Configuración Inicial</h3>
+        <ol>
+            <li>☐ Clonar el repositorio</li>
+            <li>☐ Ejecutar <code>flutter pub get</code></li>
+            <li>☐ Realizar <code>flutter pub run build_runner build</code> (si hay generated files)</li>
+            <li>☐ Configurar credenciales MQTT (en MqttService)</li>
+            <li>☐ Configurar variables de ambiente</li>
+            <li>☐ Compilar y ejecutar en emulador/dispositivo</li>
+        </ol>
+
+        <h3>Desarrollo</h3>
+        <ol>
+            <li>☐ Entender la arquitectura por capas</li>
+            <li>☐ Usar Provider para servicios compartidos</li>
+            <li>☐ Usar BLoC para lógica compleja (GPS)</li>
+            <li>☐ Mantener models en domain layer</li>
+            <li>☐ Usar go_router para navegación</li>
+            <li>☐ Agregar permisos en AndroidManifest.xml e Info.plist</li>
+            <li>☐ Testear GPS y MQTT en dispositivo real</li>
+        </ol>
+
+        <h3>Antes de Publicar</h3>
+        <ol>
+            <li>☐ Cambiar credenciales hardcodeadas por variables de ambiente</li>
+            <li>☐ Verificar que los permisos están solicitados correctamente</li>
+            <li>☐ Testear en diferentes dispositivos y versiones de Android/iOS</li>
+            <li>☐ Revisar logs y eliminar prints de debug</li>
+            <li>☐ Aumentar version en pubspec.yaml</li>
+            <li>☐ Generar APK/AAB para Android o IPA para iOS</li>
+            <li>☐ Testear instalación en dispositivo limpio</li>
+        </ol>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <p>Satélite Peru App MIBUS - Manual Técnico</p>
+            <p>Documento generado: Febrero 20, 2026</p>
+            <p>Para más información, consultar la documentación del código fuente.</p>
+        </div>
+
+    </div>
+
+    <script>
+        // Permitir impresión a PDF
+        if (window.print) {
+            console.log('Puedes imprimirlo a PDF con Ctrl+P o Cmd+P');
+        }
+    </script>
+</body>
+</html>
