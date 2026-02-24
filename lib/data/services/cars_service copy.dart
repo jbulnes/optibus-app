@@ -121,19 +121,21 @@ class CarsService with ChangeNotifier {
 
   Future<void> updateAutosWithData(Map<String, dynamic> data) async {
     print('🍺h🍺 recibido updateAutosWithData : ${data}');
-    String plateStream = data["plate"];
+    int idVehiculoStream = data["id_vehiculo"];
 
     for (var auto in autos) {
-      if (auto.placa == plateStream) {
-        int accCapturador = data["accStatus"] == true ? 1 : 0;
-        String terminalCapturador = data["terminal"] ?? "";
-        String sentido = data["sense"] ?? "";
-        double kilometrajeAcumCapturador = data["dailyMileage"]?.toDouble() ?? 0.0;
+      if (auto.idVehiculo == idVehiculoStream) {
+        int accCapturador = data["ACC"] ?? 0;
+        String terminalCapturador = data["terminal"];
+        double kilometrajeAcumCapturador =
+            data["kilometraje_acum"]?.toDouble() ?? 0.0;
         // Obtener las nuevas coordenadas de la trama actual
-        double latitudCapturador = data["latitude"] ?? 0.0;
-        double longitudCapturador = data["longitude"] ?? 0.0;
-        int velocidadCapturador = data["speed"] ?? 0;
-        String fechaStr = data["timestamp"] ?? '';
+        double latitudCapturador = data["tramaActual"]["latitud"] ?? 0.0;
+        double longitudCapturador = data["tramaActual"]["longitud"] ?? 0.0;
+        int velocidadCapturador =
+            int.parse(data["tramaActual"]["velocidad"].toString()) ?? 0;
+
+        String fechaStr = data["tramaActual"]["fecha"] ?? '';
         DateTime fechaCapturador = DateTime.parse(fechaStr);
 
         String formattedTime = DateFormat('HH:mm').format(fechaCapturador);
@@ -152,10 +154,7 @@ class CarsService with ChangeNotifier {
         auto.acc = accCapturador;
         auto.velocidad = velocidadCapturador;
         auto.terminal = terminalCapturador;
-        auto.sentido = sentido;
         auto.kilometrajeAcum = kilometrajeAcumCapturador;
-        auto.imeil = data["deviceId"];
-        auto.direccionTramaActual = data["address"] ?? "";
 
         String fechaTramaActualStr;
         if (difference.inDays >= 1) {
@@ -165,11 +164,32 @@ class CarsService with ChangeNotifier {
           auto.fechaTramaActual = fechaTramaActualStr;
         }
 
-        autoAddresses[auto.placa ?? ''] = '${auto.direccionTramaActual}';
+        // Actualizar la dirección del auto basado en la latitud y longitud capturadas
+        final address = await getAddress(latitudCapturador, longitudCapturador);
+        if (address != null) {
+          auto.direccionTramaActual = address;
+        }
+        autoAddresses[auto.placa ?? ''] = '${address}';
+
+        // if (latitudLast != null && longitudLast != null) {
+        //   //ACTUALIZAR KM ACUMULADOS
+        //   final distanciaRecorrida = _calulateKilometrajeAcumulados(
+        //     latitudLast,
+        //     longitudLast,
+        //     auto.latitud,
+        //     auto.longitud,
+        //   );
+
+        //   print('CHACA ${distanciaRecorrida}');
+        //   // auto.kilometrajeAcum = kilometrajeAcumCapturador;
+        //   auto.kilometrajeAcum += distanciaRecorrida;
+        // }
+
+        // print('🍺🍺🍺 actualizado: ${auto.toJson()}');
       }
     }
     // Solo si el idVehiculo del stream coincide con el seleccionado
-    if (plateStream == _selectedAuto.placa) {
+    if (idVehiculoStream == _selectedAuto.idVehiculo) {
       print(
           'HB HERNAN - recibiste actualización ${_selectedAuto.velocidad} ${_selectedAuto.fecha} ${_selectedAuto.latitud} ${_selectedAuto.longitud}');
 
@@ -209,7 +229,6 @@ class CarsService with ChangeNotifier {
         acc: _selectedAuto.acc,
         velocidad: _selectedAuto.velocidad,
         terminal: _selectedAuto.terminal,
-        sentido: _selectedAuto.sentido,
         kilometrajeAcum: _selectedAuto.kilometrajeAcum,
         imeil: _selectedAuto.imeil,
         kmgalon: _selectedAuto.kmgalon,

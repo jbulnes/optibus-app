@@ -11,6 +11,7 @@ class Auto {
   dynamic? acc;
   dynamic? velocidad;
   dynamic? terminal;
+  dynamic? sentido;
   dynamic? kilometrajeAcum;
   dynamic? latitud;
   dynamic? longitud;
@@ -34,6 +35,7 @@ class Auto {
       required this.acc,
       required this.velocidad,
       required this.terminal,
+      required this.sentido,
       required this.kilometrajeAcum,
       required this.latitud,
       required this.longitud,
@@ -57,6 +59,7 @@ class Auto {
     dynamic? acc,
     dynamic? velocidad,
     dynamic? terminal,
+    dynamic? sentido,
     dynamic? kilometrajeAcum,
     dynamic? latitud,
     dynamic? longitud,
@@ -79,6 +82,7 @@ class Auto {
         acc: acc ?? this.acc,
         velocidad: velocidad ?? this.velocidad,
         terminal: terminal ?? this.terminal,
+        sentido: sentido ?? this.sentido,
         kilometrajeAcum: kilometrajeAcum ?? this.kilometrajeAcum,
         latitud: latitud ?? this.latitud,
         longitud: longitud ?? this.longitud,
@@ -104,6 +108,7 @@ class Auto {
         acc: json["ACC"] != null ? json["ACC"] : 0,
         velocidad: json["velocidad"] != null ? json["velocidad"] : 0,
         terminal: json["terminal"], // Proporcionar un valor por defecto
+        sentido: json["sentido"], 
         fecha: json['fecha'] != null ? DateTime.parse(json['fecha']) : null,
         fechaEncendido: json['fechaEncendido'] != null
             ? DateTime.parse(json['fechaEncendido'])
@@ -143,6 +148,7 @@ class Auto {
         "ACC": acc,
         "velocidad": velocidad,
         "terminal": terminal,
+        "sentido": sentido,
         "latitud": latitud,
         "longitud": longitud,
         "kilometraje_acum": kilometrajeAcum,

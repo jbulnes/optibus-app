@@ -62,7 +62,8 @@ class MqttService {
         _isConnected = true; // Marcar como conectado
 
         // Una vez conectado, suscríbete al tema deseado
-        subscribe('capturador/data-vehiculo/${idEmpresa}');
+        //subscribe('capturador/data-vehiculo/${idEmpresa}');
+        subscribe('gps-location-topic');
         _reconnectTimer?.cancel();
       } on NoConnectionException catch (e) {
         print('MqttService: Connection failed - $e');

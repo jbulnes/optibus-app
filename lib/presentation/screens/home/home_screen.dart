@@ -493,36 +493,36 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                     width: 20,
                                                     height: 20,
                                                     decoration: BoxDecoration(
-                                                      color: auto.terminal ==
-                                                              'TERMINAL_FINAL'
-                                                          ? Colors.red
-                                                          : Colors
-                                                              .blue, // Color de fondo rojo
+                                                      color: auto.sentido == 'TERMINAL'
+                                                          ? Colors.yellow
+                                                          : auto.sentido == 'VUELTA'
+                                                              ? Colors.red
+                                                              : Colors.blue,
                                                       shape: BoxShape
                                                           .circle, // Forma circular
                                                     ),
                                                     child: Center(
                                                       child: Icon(
                                                         size: 15,
-                                                        auto.terminal ==
-                                                                'TERMINAL_FINAL'
-                                                            ? Icons
-                                                                .arrow_downward
-                                                            : Icons
-                                                                .arrow_upward,
+                                                        auto.sentido == 'TERMINAL'
+                                                            ? Icons.flag
+                                                            : auto.sentido == 'VUELTA'
+                                                                ? Icons.arrow_downward
+                                                                : Icons.arrow_upward,
                                                         color: Colors.white,
                                                       ),
                                                     ),
                                                   ),
                                                   SizedBox(width: 2),
                                                   Text(
-                                                    '${auto.terminal == 'TERMINAL_FINAL' ? 'BAJADA' : 'SUBIDA'}',
+                                                    '${auto.sentido == 'TERMINAL' ? 'TERMINAL' : auto.sentido == 'VUELTA' ? 'BAJADA' : 'SUBIDA'}',
                                                     style: TextStyle(
                                                       fontSize: 14,
-                                                      color: auto.terminal ==
-                                                              'TERMINAL_FINAL'
-                                                          ? Colors.red
-                                                          : Colors.blue,
+                                                      color: auto.sentido == 'TERMINAL'
+                                                          ? Colors.yellow
+                                                          : auto.sentido == 'VUELTA'
+                                                              ? Colors.red
+                                                              : Colors.blue,
                                                     ),
                                                   ),
                                                 ],

@@ -126,7 +126,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
     _deleteUserPassword();
 
     MqttService().unsubscribe(
-      'capturador/data-vehiculo/${idEmpresa.toString()}',
+      'gps-location-topic',
     );
     MqttService().dispose();
   }
