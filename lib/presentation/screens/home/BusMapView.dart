@@ -549,7 +549,7 @@ class _BusMapViewState extends State<BusMapView> with TickerProviderStateMixin {
                       ),
                       const Divider(color: Colors.white30),
 
-                      busSelectProvider.imagenConductor.isNotEmpty
+                      (busSelectProvider.imagenConductor ?? '').isNotEmpty
                           ? Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [

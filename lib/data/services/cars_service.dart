@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:satelite_peru_mibus/data/global/environment.dart';
 import 'package:satelite_peru_mibus/domains/models/autos_models/Auto.dart';
 import 'package:satelite_peru_mibus/domains/models/autos_models/ReportsReponse.dart';
+import 'package:satelite_peru_mibus/data/services/auth_service.dart';
 
 class CarsService with ChangeNotifier {
   bool _isLoading = false;
@@ -61,6 +62,109 @@ class CarsService with ChangeNotifier {
       _isLoading = false;
     }
     notifyListeners();
+  }
+
+  Future<void> getVehiculosWeb() async {
+    _isLoading = true;
+    notifyListeners();
+
+    final apiUrl = await Environment.apiUrl;
+
+    try {
+      // 🔑 Obtener token guardado (ajusta según tu implementación)
+      final token = await AuthService.getToken(); 
+      print('FACTORIA getVehiculosWeb token: $token');
+
+      final url = Uri.parse('${apiUrl}api/vehiculos');
+
+      final resp = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (resp.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(resp.body);
+
+        if (responseData['success'] == true &&
+            responseData['data'] is List) {
+
+          final List<dynamic> vehiculosData = responseData['data'];
+          print('✅ Vehículos recibidos: ${vehiculosData.length}');
+
+          autos = vehiculosData.map((vehiculo) {
+            print('✅ Vehículos recibidos: ${vehiculo}');
+            final estado = vehiculo['vehiculoEstado'] ?? {};
+
+            return Auto(
+              idVehiculo: vehiculo['id'] ?? 0,
+              placa: vehiculo['numeroPlaca'] ?? "",
+              codigoInterno: vehiculo['padron'] ?? "",
+              
+              acc: estado['motorEncendido'] == true ? 1 : 0,
+              velocidad: estado['velocidad'] ?? 0,
+              terminal: estado['terminal'] ?? "",
+              sentido: estado['sentido'] ?? vehiculo['sentido'] ?? "",
+              
+              kilometrajeAcum: (vehiculo['kilometrajeDia'] ?? 0).toDouble(),
+              
+              latitud: (estado['latitud'] ?? 0.0).toDouble(),
+              longitud: (estado['longitud'] ?? 0.0).toDouble(),
+              
+              fecha: estado['actualizadoEn'] != null
+                  ? DateTime.parse(estado['actualizadoEn'])
+                  : DateTime.now(),
+              
+              fechaEncendido: estado['fechaEncendido'] != null
+                  ? DateTime.parse(estado['fechaEncendido'])
+                  : DateTime.now(),
+              
+              fechapagado: estado['fechaApagado'] != null
+                  ? DateTime.parse(estado['fechaApagado'])
+                  : DateTime.now(),
+              
+              kilometrajeAcumuladoAyer: 0.0, // no viene en API
+              kilometrajeAcumuladoMes: 0.0,  // no viene en API
+              
+              direccionTramaActual: estado['address'],
+              
+              nombreConductor: 'Nombre Conductor', // no viene en API
+              imagenConductor: null,
+              
+              imeil: vehiculo['imei'],
+              sim: vehiculo['sim'],
+              kmgalon: (vehiculo['kmGalon'] ?? 0).toDouble(),
+            );
+          }).toList();
+
+          // 🔥 Ordenar igual que la web
+          autos.sort((a, b) =>
+              (a.placa ?? "").compareTo(b.placa ?? ""));
+
+          print("✅ Vehículos cargados: ${autos.length}");
+        } else {
+          print("⚠️ Respuesta inválida: ${resp.body}");
+          autos.clear();
+        }
+      } else if (resp.statusCode == 401 ||
+                resp.statusCode == 403) {
+        print("⛔ Token inválido o expirado");
+        autos.clear();
+        // Aquí puedes hacer logout automático
+      } else {
+        print("❌ Error HTTP: ${resp.statusCode}");
+        autos.clear();
+      }
+    } catch (e) {
+      print("💥 Error getVehiculosWeb: $e");
+      autos.clear();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<String?> obtenerDireccion(double lat, double lon) async {

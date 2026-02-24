@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Environment {
-  static const String defaultApiUrl = "https://mibus.pe/";
+  static const String defaultApiUrl = "https://optibus.pe/";
   static const String apiUrlPrefKey = "API_URL_PREF";
 
   // static String apiUrl = "https://mibus.pe/";

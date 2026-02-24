@@ -44,7 +44,7 @@ class AuthService with ChangeNotifier {
     await _storage.delete(key: 'token');
   }
 
-  void guardarDatosUsuario(
+  Future<void> guardarDatosUsuario(
       String email, String idEmpresa, String idUsuario) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('email', email);
@@ -106,6 +106,110 @@ class AuthService with ChangeNotifier {
       }
     } catch (e) {
       print('Error catch signIn : ${e}');
+      return false;
+    }
+  }
+
+  Future<dynamic> signInWeb(String username, String password) async {
+    autenticando = true;
+
+    final data = {
+      'username': username,
+      'password': password,
+    };
+
+    final apiUrl = await Environment.apiUrl;
+
+    print('💥 DATA: ${data} - ${apiUrl}');
+
+    try {
+      final url = Uri.parse('${apiUrl}api/auth/login');
+
+      final resp = await http.post(
+        url,
+        body: jsonEncode(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      );
+
+      autenticando = false;
+
+      if (resp.statusCode == 200) {
+        final responseData = jsonDecode(resp.body);
+        final token = responseData['token'];
+
+        if (token == null) {
+          return responseData['message'] ?? 'No se recibió token';
+        }
+
+        // 🔓 Decodificar JWT
+        Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+        List<dynamic> authorities = decodedToken['roles'] ?? [];
+
+        // 🎭 Extraer ROLE_
+        String? role;
+        for (var auth in authorities) {
+          if (auth.toString().startsWith("ROLE_")) {
+            role = auth.toString().replaceFirst("ROLE_", "");
+            break;
+          }
+        }
+
+        // 🎨 Mapear roles
+        const roleMap = {
+          "SISTEMAS": "Sistemas",
+          "ADMINISTRADOR": "Administrador",
+          "SUPER-ADMINISTRADOR": "Super-Administrador",
+          "MONITORISTA": "Monitorista",
+          "SOCIO": "Socio",
+          "USER": "Usuario",
+          "ADMIN": "Administrador",
+          "SUPER_ADMIN": "Super Administrador",
+        };
+
+        String roleCast = roleMap[role] ?? "Desconocido";
+
+        // 🔑 Permisos (los que no empiezan con ROLE_)
+        List<String> permissions = authorities
+            .where((auth) => !auth.toString().startsWith("ROLE_"))
+            .map((e) => e.toString())
+            .toList();
+
+        // 💾 Guardar token
+        await _saveToken(token);
+
+        // 🧑 Crear sesión mínima
+        userSession = Usuario(
+          id: int.tryParse(decodedToken['sub'].toString()),
+          email: responseData['email'],
+          idEmpresa: int.tryParse(responseData['empresaId'].toString()),
+          token: token,
+        );
+
+        // Puedes guardar extras si quieres
+        await guardarDatosUsuario(
+          responseData['email'] ?? '',
+          responseData['empresaId']?.toString() ?? '',
+          decodedToken['sub']?.toString() ?? '',
+        );
+
+        print('💥 DATA: ${responseData['email']} - ${responseData['empresaId']} - ${decodedToken['sub']} - ${token}');
+
+        // 🔄 Actualizar estado
+        authStatus = AuthStatus.authenticated;
+        notifyListeners();
+
+        print("✅ Login Web OK - Rol: $roleCast");
+
+        return true;
+      } else {
+        final resBody = jsonDecode(resp.body);
+        return resBody['message'];
+      }
+    } catch (e) {
+      autenticando = false;
+      print("Error signInWeb: $e");
       return false;
     }
   }

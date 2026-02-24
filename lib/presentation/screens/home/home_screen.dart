@@ -39,7 +39,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? idUsuario = prefs.getString('idUsuario');
 
-    await _carsService.getAutos('${idUsuario.toString()}');
+    //await _carsService.getAutos('${idUsuario.toString()}');
+    await _carsService.getVehiculosWeb();
     setState(() {
       _isLoading = false;
     });
@@ -98,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         backgroundColor: Color(0Xff4737FF),
         foregroundColor: Colors.white,
         title: Text(
-          'Vehiculos',
+          'Vehículos',
         ),
       ),
       backgroundColor: isLightMode == true ? AppTheme.white : Color(0xff18191A),
@@ -581,11 +582,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                         children: [
                                           ElevatedButton(
                                             onPressed: () {
-                                              // print(
-                                              //     'HB HERNAN ${auto.idVehiculo} ${carsService.selectedAuto.idVehiculo}');
-                                              //RESETEAR SI ES DIFERENTE
-                                              // print(
-                                              //     'KIK ${carsService?.selectedAuto?.idVehiculo}');
 
                                               carsService.resetAutosHistorial();
                                               carsService.setSelectedAuto(auto);
@@ -595,7 +591,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                                 extra: {
                                                   'latitude': auto.latitud,
                                                   'longitude': auto.longitud,
-                                                  'id_auto': auto.idVehiculo
                                                 },
                                               );
                                             },

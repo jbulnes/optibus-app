@@ -32,8 +32,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isChecked = false;
 
   List<UrlOption> urlOptions = [
-    UrlOption(displayName: 'OptiBus', url: 'https://optibus.pe/'),
-    //UrlOption(displayName: 'MiBus', url: 'https://mibus.pe/'),
+    UrlOption(displayName: 'FlotaBus', url: 'https://flotabus.com/'),
+    UrlOption(displayName: 'MiBus', url: 'https://mibus.pe/'),
   ];
 
   String? selectedUrl;
@@ -187,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       width: 100, height: 100),
                                   const SizedBox(height: 10),
                                   const Text(
-                                    "OPTIBUS",
+                                    "MIBUS APP",
                                     style: TextStyle(
                                       fontSize: 20,
                                       color: Color(0xffDA2C26),
@@ -198,6 +198,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             const SizedBox(height: 10),
+                            RoundedInputField(
+                              hintText: "Empresa",
+                              icon: Ionicons.bus,
+                              onChange: (value) {},
+                              controller: _empresaController,
+                            ),
                             RoundedInputField(
                               controller: _userController,
                               hintText: "Usuario",
@@ -258,9 +264,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                           isLoading = true;
                                         });
                                         final loginOk =
-                                            await authService.signInWeb(
+                                            await authService.signIn(
                                           _userController.text.trim(),
                                           _passwordController.text.trim(),
+                                          _empresaController.text.trim(),
                                         );
                                         setState(() {
                                           isLoading = false;
