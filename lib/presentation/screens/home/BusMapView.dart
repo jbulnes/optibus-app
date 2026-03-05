@@ -336,7 +336,7 @@ class _BusMapViewState extends State<BusMapView> with TickerProviderStateMixin {
                     ),
                     SliverList.list(children: [
                       Text(
-                        'Detalles del GPS Javier',
+                        'Detalles del GPS',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
