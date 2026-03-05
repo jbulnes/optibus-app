@@ -131,8 +131,8 @@ class CarsService with ChangeNotifier {
               
               direccionTramaActual: estado['address'],
               
-              nombreConductor: 'Nombre Conductor', // no viene en API
-              imagenConductor: null,
+              nombreConductor: vehiculo['nombreConductor'] ?? "Nombre Conductor",
+              imagenConductor: vehiculo['imagenConductor'] ?? null,
               
               imeil: vehiculo['imei'],
               sim: vehiculo['sim'],
