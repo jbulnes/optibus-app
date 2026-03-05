@@ -66,6 +66,7 @@ dependencies:
   syncfusion_flutter_gauges: ^32.2.5
   url_launcher: ^6.3.0
   webview_flutter: ^4.8.0
+  device_info_plus: ^11.0.0
 
 dependency_overrides:
   flutter_compass: ^0.8.1

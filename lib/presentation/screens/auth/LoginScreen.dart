@@ -14,6 +14,8 @@ import 'package:satelite_peru_mibus/presentation/components/buttons/rounded_butt
 import 'package:satelite_peru_mibus/presentation/components/inputs/rounded_input_field.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:satelite_peru_mibus/data/global/device_info_helper.dart'; 
+import 'package:flutter/services.dart';
 
 class LoginScreen extends StatefulWidget {
   static const nameScreen = "login_screen";
@@ -30,6 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool isLoading = false;
   bool isChecked = false;
+  String deviceId = "Cargando...";
 
   List<UrlOption> urlOptions = [
     UrlOption(displayName: 'OptiBus', url: 'https://optibus.pe/'),
@@ -45,6 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
     _loadSavedUsername();
     _loadSavedUserPassword();
     _loadSavedUrl(); // Cargar URL seleccionada
+    _getDeviceId();
   }
 
   Future<void> _loadSavedUrl() async {
@@ -68,6 +72,13 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
+  void _getDeviceId() async {
+    String id = await getUniqueId();
+    setState(() {
+      deviceId = id;
+    });
+  }
+
   @override
   void dispose() {
     _userController.dispose();
@@ -84,65 +95,150 @@ class _LoginScreenState extends State<LoginScreen> {
           backgroundColor:
               isLightMode ? AppTheme.white : const Color(0xff18191A),
           title: Text(
-            'Configuración de API URL',
+            'Configuración',
             style: TextStyle(
                 fontSize: 16, color: isLightMode ? Colors.black : Colors.white),
           ),
-          // content: SizedBox(
-          //   height: 150,
-          //   child: CupertinoPicker(
-          //     itemExtent: 30,
-          //     onSelectedItemChanged: (int value) {
-          //       setState(() {
-          //         selectedUrl = urlOptions[value].url;
-          //       });
-          //     },
-          //     children: urlOptions.map((option) {
-          //       return Text(
-          //         option.displayName,
-          //         style: TextStyle(
-          //             color: isLightMode ? Colors.black : Colors.white),
-          //       );
-          //     }).toList(),
-          //   ),
-          // ),
-          content: SizedBox(
-            height: 150,
-            child: CupertinoPicker(
-              itemExtent: 30,
-              scrollController: FixedExtentScrollController(
-                initialItem: selectedIndex, // Establecer el índice inicial
+          content: Column( // Cambiamos a Column para meter ambos widgets
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 1. El Selector de URL
+              SizedBox(
+                height: 120, // Ajustamos un poco la altura
+                child: CupertinoPicker(
+                  itemExtent: 30,
+                  scrollController: FixedExtentScrollController(
+                    initialItem: selectedIndex,
+                  ),
+                  onSelectedItemChanged: (int value) {
+                    setState(() {
+                      selectedIndex = value;
+                      selectedUrl = urlOptions[value].url;
+                    });
+                  },
+                  children: urlOptions.map((option) {
+                    return Text(
+                      option.displayName,
+                      style: TextStyle(
+                          color: isLightMode ? Colors.black : Colors.white),
+                    );
+                  }).toList(),
+                ),
               ),
-              onSelectedItemChanged: (int value) {
-                setState(() {
-                  selectedIndex = value;
-                  selectedUrl = urlOptions[value].url;
-                });
-              },
-              children: urlOptions.map((option) {
-                return Text(
-                  option.displayName,
-                  style: TextStyle(
-                      color: isLightMode ? Colors.black : Colors.white),
-                );
-              }).toList(),
-            ),
+              
+              const Divider(), // Una línea separadora para que se vea ordenado
+              const SizedBox(height: 5),
+
+              // 2. El Identificador de Dispositivo dentro del Modal
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isLightMode ? Colors.grey[100] : Colors.white.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xff6456FF).withOpacity(0.3),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      "IDENTIFICADOR DE DISPOSITIVO",
+                      style: TextStyle(
+                        fontSize: 9, // Un poco más pequeño para el modal
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.1,
+                        color: isLightMode ? Colors.grey[600] : Colors.grey[400],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Iconsax.mobile_copy, size: 14, color: const Color(0xff6456FF)),
+                        const SizedBox(width: 6),
+                        Flexible( // Para que el texto no se corte si es muy largo
+                          child: Text(
+                            deviceId,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontFamily: 'monospace',
+                              color: isLightMode ? Colors.black87 : Colors.white70,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          constraints: const BoxConstraints(),
+                          padding: const EdgeInsets.only(left: 8),
+                          icon: const Icon(Icons.copy_rounded, size: 16, color: Color(0xff6456FF)),
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: deviceId));
+                            // Cerramos el modal para que el SnackBar sea visible en el fondo
+                            // o usamos el context global.
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("ID copiado al portapapeles"),
+                                behavior: SnackBarBehavior.floating,
+                                duration: Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           actions: <Widget>[
-            TextButton(
-              child: const Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: const Text('Guardar'),
-              onPressed: () {
-                if (selectedUrl != null) {
-                  _saveUrlToStorage(selectedUrl!);
-                }
-                Navigator.of(context).pop();
-              },
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Botón Cancelar - Estilo minimalista
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      // Color de texto rojo claro (ajusta el tono según prefieras, red[300] es suave)
+                      foregroundColor: Colors.red[300], 
+                      // Un fondo muy sutil opcional para darle un toque
+                      backgroundColor: isLightMode ? Colors.red.withOpacity(0.05) : Colors.red.withOpacity(0.1),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Cancelar',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+
+                  // Botón Guardar - Estilo llamativo (acorde a tu botón INGRESAR)
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff6456FF), // El violeta de tu app
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Guardar',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () {
+                      if (selectedUrl != null) {
+                        _saveUrlToStorage(selectedUrl!);
+                      }
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         );

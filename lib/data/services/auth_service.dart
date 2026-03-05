@@ -7,6 +7,7 @@ import 'package:satelite_peru_mibus/data/global/environment.dart';
 import 'package:satelite_peru_mibus/domains/models/authmodels/UserResponse.dart';
 import 'package:satelite_peru_mibus/domains/models/authmodels/Usuario.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:satelite_peru_mibus/data/global/device_info_helper.dart';
 
 enum AuthStatus { checking, authenticated, notAuthenticated }
 
@@ -113,9 +114,12 @@ class AuthService with ChangeNotifier {
   Future<dynamic> signInWeb(String username, String password) async {
     autenticando = true;
 
+    String deviceId = await getUniqueId();
+    print('Device ID: $deviceId');
     final data = {
       'username': username,
       'password': password,
+      'deviceId': deviceId
     };
 
     final apiUrl = await Environment.apiUrl;
@@ -123,8 +127,7 @@ class AuthService with ChangeNotifier {
     print('💥 DATA: ${data} - ${apiUrl}');
 
     try {
-      final url = Uri.parse('${apiUrl}api/auth/login');
-
+      final url = Uri.parse('${apiUrl}api/auth/login-mobile');
       final resp = await http.post(
         url,
         body: jsonEncode(data),
@@ -135,8 +138,11 @@ class AuthService with ChangeNotifier {
 
       autenticando = false;
 
+      print('${resp.statusCode} |auth_service| api: url/auth/login-mobile 🌟 ${resp.body}');
       if (resp.statusCode == 200) {
-        final responseData = jsonDecode(resp.body);
+        final decodedBody = jsonDecode(resp.body);
+        final responseData = decodedBody['data'];
+        print('DATAAAAAA ${responseData}');
         final token = responseData['token'];
 
         if (token == null) {
@@ -200,7 +206,7 @@ class AuthService with ChangeNotifier {
         authStatus = AuthStatus.authenticated;
         notifyListeners();
 
-        print("✅ Login Web OK - Rol: $roleCast");
+        print("✅ Login Web OK  - Rol: $roleCast");
 
         return true;
       } else {
