@@ -191,7 +191,7 @@ class _BusMapHistorialState extends State<BusMapHistorial>
 
     final eventDetailsData = reportsService.eventDetails;
 
-    void handleTabChange(int index) async {
+    void handleTabChangeOld(int index) async {
       setState(() {
         route = [];
       });
@@ -274,6 +274,46 @@ class _BusMapHistorialState extends State<BusMapHistorial>
         default:
           print("Acción para la pestaña ");
           break;
+      }
+    }
+
+    void handleTabChange(int index) async {
+      setState(() => route = []);
+      
+      // 1. Calculamos el rango de fechas basado en el índice
+      DateTime ahora = DateTime.now();
+      DateTime inicio;
+
+      switch (index) {
+        case 0: inicio = ahora.subtract(const Duration(minutes: 30)); break;
+        case 1: inicio = ahora.subtract(const Duration(hours: 1)); break;
+        case 2: inicio = ahora.subtract(const Duration(hours: 2)); break;
+        case 3: inicio = ahora.subtract(const Duration(hours: 7)); break;
+        case 4: inicio = DateTime(ahora.year, ahora.month, ahora.day); break; // Hoy
+        case 5: inicio = DateTime(ahora.year, ahora.month, ahora.day).subtract(const Duration(days: 1)); break; // Ayer
+        default: inicio = ahora.subtract(const Duration(minutes: 30));
+      }
+
+      // Formatear a ISO 8601 (el formato que usa tu API de Vue)
+      String fechaInicio = inicio.toIso8601String().split('.')[0]; 
+      String fechaFin = ahora.toIso8601String().split('.')[0];
+
+      // 2. Llamamos a la nueva función
+      await reportsService.getLocationsRouteWeb(
+        plate: placa, // Asegúrate de tener la placa disponible
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
+      );
+
+      // 3. Actualizamos el estado local (esta parte no cambia)
+      if (reportsService.routeLocations.isNotEmpty) {
+        setState(() {
+          route = reportsService.routeLocations;
+          _currentLocation = route[0];
+          _currentIndex = 0;
+          _isPaused = true;
+        });
+        _centerMap();
       }
     }
 
