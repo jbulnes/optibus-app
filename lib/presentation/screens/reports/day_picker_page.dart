@@ -127,7 +127,7 @@ class _DayPickerPageState extends State<DayPickerPage> {
       );
     }
 
-    void hanldleVueltasKilometraje(BuildContext context, int vehiculoId) async {
+    void hanldleVueltasKilometraje(BuildContext context, String placa) async {
       DateTime dateTime = DateTime.parse(_selectedDate.toString());
       String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
 
@@ -135,8 +135,8 @@ class _DayPickerPageState extends State<DayPickerPage> {
         _isLoading = true;
       });
 
-      ReportResponse? response = await carsService.getReportBus(
-        idVehiculo: vehiculoId,
+      ReportResponse? response = await carsService.getReportBusWeb(
+        placa: placa,
         fecha: formattedDate,
         type: 'day',
       );
@@ -153,6 +153,7 @@ class _DayPickerPageState extends State<DayPickerPage> {
               "placa": reporte.placa,
               "reporte_fecha_desde": reporte.reporteFechaDesde,
               "reporte_kilometraje": reporte.reporteKilometraje,
+              "nro_vueltas": reporte.nroVueltas,
               // "tipo_busqueda": reporte.type,
               "km_vuelta": reporte.flota.kmVuelta
             }
@@ -325,7 +326,7 @@ class _DayPickerPageState extends State<DayPickerPage> {
                   color: const Color(0xff6456FF),
                   isLoading: _isLoading,
                   press: () {
-                    hanldleVueltasKilometraje(context, vehiculo_id);
+                    hanldleVueltasKilometraje(context, placaVehiculo);
                   },
                 ),
                 const SizedBox(height: 10.0),
@@ -472,12 +473,17 @@ class _DayPickerPageState extends State<DayPickerPage> {
     );
   }
 
+
   List<Widget> _buildDataRows(String placaVehiculo) {
     return reportData.map((item) {
-      int vueltas = (item['reporte_kilometraje'] / item['km_vuelta']).floor();
+      // 1. EXTRAE EL VALOR DIRECTAMENTE (Sin dividir)
+      // Usamos double.tryParse para asegurar que sea un número antes de mostrarlo
+      double nroVueltas = double.tryParse(item['nro_vueltas'].toString()) ?? 0.0;
+      
+      // 2. CONVIERTE EL KM A DOUBLE PARA EVITAR EL ERROR DEL /
+      double kmRecorrido = double.tryParse(item['reporte_kilometraje'].toString()) ?? 0.0;
 
-      DateTime dateTime =
-          DateTime.parse(item['reporte_fecha_desde'].toString());
+      DateTime dateTime = DateTime.parse(item['reporte_fecha_desde'].toString());
       String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
 
       const styleCampos = TextStyle(fontSize: 14.0);
@@ -486,10 +492,12 @@ class _DayPickerPageState extends State<DayPickerPage> {
         children: [
           _buildCell(placaVehiculo, textStyle: styleCampos, hideBottom: true),
           _buildCell(formattedDate,
-              textStyle: TextStyle(fontSize: 12.0), hideBottom: true),
-          _buildCell(item['reporte_kilometraje'].toStringAsFixed(2),
+              textStyle: const TextStyle(fontSize: 12.0), hideBottom: true),
+          // Mostramos el km convertido correctamente
+          _buildCell(kmRecorrido.toStringAsFixed(2),
               textStyle: styleCampos, hideBottom: true),
-          _buildCell(vueltas.toString(),
+          // Mostramos las vueltas que ya vienen de la API
+          _buildCell(nroVueltas.toStringAsFixed(2),
               textStyle: styleCampos, hideBottom: true),
         ],
       );

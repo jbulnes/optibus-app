@@ -53,6 +53,7 @@ class Reporte {
   DateTime reporteFechaDesde;
   DateTime reporteFechaHasta;
   dynamic reporteKilometraje;
+  double nroVueltas;
   String type;
   Flota flota;
 
@@ -65,6 +66,7 @@ class Reporte {
     required this.reporteFechaDesde,
     required this.reporteFechaHasta,
     required this.reporteKilometraje,
+    required this.nroVueltas,
     required this.type,
     required this.flota,
   });
@@ -78,6 +80,7 @@ class Reporte {
     DateTime? reporteFechaDesde,
     DateTime? reporteFechaHasta,
     dynamic? reporteKilometraje,
+    double? nroVueltas,
     String? tipoBusqueda,
     Flota? flota,
   }) =>
@@ -90,6 +93,7 @@ class Reporte {
         reporteFechaDesde: reporteFechaDesde ?? this.reporteFechaDesde,
         reporteFechaHasta: reporteFechaHasta ?? this.reporteFechaHasta,
         reporteKilometraje: reporteKilometraje ?? this.reporteKilometraje,
+        nroVueltas: nroVueltas ?? this.nroVueltas,
         type: type ?? this.type,
         flota: flota ?? this.flota,
       );
@@ -103,6 +107,7 @@ class Reporte {
         reporteFechaDesde: DateTime.parse(json["reporte_fecha_desde"]),
         reporteFechaHasta: DateTime.parse(json["reporte_fecha_hasta"]),
         reporteKilometraje: json["reporte_kilometraje"],
+        nroVueltas: double.tryParse(json["nro_vueltas"].toString()) ?? 0.0,
         type: json["type"],
         flota: Flota.fromJson(json["flota"]),
       );
@@ -116,6 +121,7 @@ class Reporte {
         "reporte_fecha_desde": reporteFechaDesde.toIso8601String(),
         "reporte_fecha_hasta": reporteFechaHasta.toIso8601String(),
         "reporte_kilometraje": reporteKilometraje,
+        "nro_vueltas": nroVueltas,
         "type": type,
         "flota": flota.toJson(),
       };

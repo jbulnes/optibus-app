@@ -398,6 +398,10 @@ class CarsService with ChangeNotifier {
       'type': type,
       if (fechaEnd != null && fechaEnd.isNotEmpty) 'fecha_end': fechaEnd,
     };
+
+    print('FACTORIA getReportBus params: $params');
+
+
     final apiUrl = await Environment.apiUrl; // Resuelve la URL correcta
     print('FACTORIA getReportBus apiUrl $apiUrl');
     try {
@@ -421,6 +425,103 @@ class CarsService with ChangeNotifier {
       return null;
     }
   }
+
+  Future<ReportResponse?> getReportBusWeb({
+    required String placa,
+    required String type,
+    required String fecha, // Para 'day' es yyyy-MM-dd, para 'month' es yyyy-MM
+    String? fechaEnd,      // Usado en 'week'
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    final apiUrl = await Environment.apiUrl;
+    String inicio = "";
+    String fin = "";
+
+    // 🕒 1. Lógica para adaptar los rangos de fecha según el 'type'
+    if (type == 'day') {
+      inicio = "$fecha 00:00:00";
+      fin = "$fecha 23:59:59";
+    } else if (type == 'week' && fechaEnd != null) {
+      inicio = "$fecha 00:00:00";
+      fin = "$fechaEnd 23:59:59";
+    } else if (type == 'month') {
+      // Para meses, calculamos el primer y último día
+      DateTime firstDay = DateTime.parse("$fecha-01");
+      DateTime lastDay = DateTime(firstDay.year, firstDay.month + 1, 0);
+      inicio = "${DateFormat('yyyy-MM-dd').format(firstDay)} 00:00:00";
+      fin = "${DateFormat('yyyy-MM-dd').format(lastDay)} 23:59:59";
+    }
+
+    try {
+      final token = await AuthService.getToken();
+      
+      // Construcción de la URL con parámetros GET
+      final url = Uri.parse(
+          '${apiUrl}api/reporte-kilometraje/lista?placa=$placa&inicio=$inicio&fin=$fin');
+      
+      print('🚀 LLAMANDO REPORTE WEB: $url');
+
+      final response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      print('🚀 RESPUESTA REPORTE WEB: ${response.statusCode} ${response.body}');
+      if (response.statusCode == 200) {
+        final List<dynamic> dataList = json.decode(response.body);
+        
+        if (dataList.isNotEmpty) {
+          // 🔄 2. Mapeo de la respuesta Web a la estructura de ReportResponse
+          // Buscamos el objeto que coincida con la placa (aunque la API ya filtra)
+          final item = dataList.first;
+          final manualReport = {
+            "success": true,
+            "message": "Reporte obtenido exitosamente",
+            "reporte": {
+              "id_vehiculo": 0, // int obligatorio
+              "imeil": int.tryParse(item['imei'].toString()) ?? 0, // Debe ser int
+              "placa": item['placa'],
+              "id_flota": 0, // int obligatorio
+              "cuenta_id": 0, // int obligatorio
+              "reporte_fecha_desde": inicio, // String para DateTime.parse
+              "reporte_fecha_hasta": fin,    // String para DateTime.parse
+              "reporte_kilometraje": item['kilometraje'], // dynamic
+              "nro_vueltas": double.tryParse(item['nroVueltas'].toString()) ?? 0.0,
+              "type": type,
+              "flota": { // Objeto Flota obligatorio
+                "id": 0,
+                "km_vuelta": 0
+              }
+            }
+          };
+
+          print('🚀 REPORTE MANUAL: $manualReport');
+
+          return ReportResponse.fromJson(manualReport);
+        }
+        return null;
+      } else {
+        print('❌ Error reporte web: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('💥 Error getReportBusWeb: $e');
+      return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+
+
+
+
 
   bool get isLoading => _isLoading;
 }

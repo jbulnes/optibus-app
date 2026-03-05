@@ -108,7 +108,7 @@ class _MonthPickerPageState extends State<MonthPickerPage> {
       );
     }
 
-    void hanldleVueltasKilometraje(BuildContext context, int vehiculoId) async {
+    void hanldleVueltasKilometraje(BuildContext context, String placa) async {
       DateTime dateTime = DateTime.parse(_selectedDate.toString());
       String formattedDateStart = DateFormat('yyyy-MM').format(dateTime);
 
@@ -116,8 +116,8 @@ class _MonthPickerPageState extends State<MonthPickerPage> {
         _isLoading = true;
       });
 
-      ReportResponse? response = await carsService.getReportBus(
-        idVehiculo: vehiculoId,
+      ReportResponse? response = await carsService.getReportBusWeb(
+        placa: placa,
         fecha: formattedDateStart,
         type: 'month',
       );
@@ -133,6 +133,7 @@ class _MonthPickerPageState extends State<MonthPickerPage> {
             {
               "placa": reporte.placa,
               "reporte_kilometraje": reporte.reporteKilometraje,
+              "nro_vueltas": reporte.nroVueltas,
               "reporte_fecha_desde": reporte.reporteFechaDesde,
               "reporte_fecha_hasta": reporte.reporteFechaHasta,
               "type": reporte.type,
@@ -305,7 +306,7 @@ class _MonthPickerPageState extends State<MonthPickerPage> {
                   color: const Color(0xff6456FF),
                   isLoading: _isLoading,
                   press: () {
-                    hanldleVueltasKilometraje(context, vehiculo_id);
+                    hanldleVueltasKilometraje(context, placaVehiculo);
                   },
                 ),
                 // Text("Selected: $_selectedDate"),
@@ -447,37 +448,40 @@ class _MonthPickerPageState extends State<MonthPickerPage> {
   }
 
   List<Widget> _buildDataRows(String placaVehiculo) {
-    return reportData.map((item) {
-      int vueltas = (item['reporte_kilometraje'] / item['km_vuelta']).floor();
+  return reportData.map((item) {
+    // 1. Conversión de valores numéricos
+    double nroVueltas = double.tryParse(item['nro_vueltas'].toString()) ?? 0.0;
+    double kmRecorrido = double.tryParse(item['reporte_kilometraje'].toString()) ?? 0.0;
 
-      DateTime dateTime =
-          DateTime.parse(item['reporte_fecha_desde'].toString());
-      String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
+    // 2. Procesamiento de fechas
+    DateTime fechaIni = DateTime.parse(item['reporte_fecha_desde'].toString());
+    DateTime fechaFin = DateTime.parse(item['reporte_fecha_hasta'].toString());
+    DateTime ahora = DateTime.now();
 
-      const styleCampos = TextStyle(fontSize: 14.0);
+    // Determinamos el formato: Si es el mismo año que el actual, omitimos el año
+    // Usamos 'dd MMM' para "01 Mar" o 'dd/MM/yy' si prefieres números
+    String formato = (fechaIni.year == ahora.year) ? 'dd MMM' : 'dd/MM/yy';
+    
+    // Localización en español (asegúrate de haber inicializado initializeDateFormatting)
+    String inicioFormateado = DateFormat(formato, 'es').format(fechaIni);
+    String finFormateada = DateFormat(formato, 'es').format(fechaFin);
 
-      return Row(
-        children: [
-          _buildCell(placaVehiculo, textStyle: styleCampos, hideBottom: true),
-          _buildCell(
-            '${formattedDate}\nhasta\n${item['reporte_fecha_hasta'].toString().substring(0, 10)}',
-            textStyle: TextStyle(fontSize: 12.0),
-            hideBottom: true,
-          ),
-          _buildCell(
-            item['reporte_kilometraje'].toStringAsFixed(2),
-            textStyle: styleCampos,
-            hideBottom: true,
-          ),
-          _buildCell(
-            vueltas.toString(),
-            textStyle: styleCampos,
-            hideBottom: true,
-          ),
-        ],
-      );
-    }).toList();
-  }
+    const styleCampos = TextStyle(fontSize: 14.0);
+
+    return Row(
+      children: [
+        _buildCell(placaVehiculo, textStyle: styleCampos, hideBottom: true),
+        // Mostramos el rango horizontal con una flecha o guion
+        _buildCell('$inicioFormateado - $finFormateada',
+            textStyle: const TextStyle(fontSize: 12.0), hideBottom: true),
+        _buildCell(kmRecorrido.toStringAsFixed(2),
+            textStyle: styleCampos, hideBottom: true),
+        _buildCell(nroVueltas.toStringAsFixed(2),
+            textStyle: styleCampos, hideBottom: true),
+      ],
+    );
+  }).toList();
+}
 
   Widget _buildCell(
     String text, {
