@@ -75,7 +75,7 @@ class CarsService with ChangeNotifier {
       final token = await AuthService.getToken(); 
       print('FACTORIA getVehiculosWeb token: $token');
 
-      final url = Uri.parse('${apiUrl}api/vehiculos');
+      final url = Uri.parse('${apiUrl}api/vehiculos-mobile');
 
       final resp = await http.get(
         url,
@@ -126,8 +126,8 @@ class CarsService with ChangeNotifier {
                   ? DateTime.parse(estado['fechaApagado'])
                   : DateTime.now(),
               
-              kilometrajeAcumuladoAyer: 0.0, // no viene en API
-              kilometrajeAcumuladoMes: 0.0,  // no viene en API
+              kilometrajeAcumuladoAyer: (vehiculo['kilometrajeAcumuladoAyer'] ?? 0).toDouble(), // no viene en API
+              kilometrajeAcumuladoMes: (vehiculo['kilometrajeAcumuladoMes'] ?? 0).toDouble(),  // no viene en API
               
               direccionTramaActual: estado['address'],
               
