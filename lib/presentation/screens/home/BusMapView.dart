@@ -149,7 +149,7 @@ class _BusMapViewState extends State<BusMapView> with TickerProviderStateMixin {
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   // 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',
                   // 'https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'dev.fleaflet.flutter_map.example',
+                  userAgentPackageName: 'com.hernanpormachi.sateliperperumibus',
                   // urlTemplate:
                   //     'https://api.mapbox.com/styles/v1/{styleId}/tiles/{z}/{x}/{y}?access_token={accessToken}',
                   // additionalOptions: const {

@@ -337,7 +337,7 @@ class _BusMapHistorialState extends State<BusMapHistorial>
                     TileLayer(
                       urlTemplate:
                           "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                          userAgentPackageName: 'dev.fleaflet.flutter_map.example',
+                          userAgentPackageName: 'com.hernanpormachi.sateliperperumibus',
                     ),
                     PolylineLayer(
                       polylines: [
