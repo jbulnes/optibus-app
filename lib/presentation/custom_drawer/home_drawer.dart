@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:satelite_peru_mibus/data/services/auth_service.dart';
 import 'package:satelite_peru_mibus/data/services/mqtt_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class HomeDrawer extends StatefulWidget {
   const HomeDrawer(
@@ -40,6 +42,15 @@ class _HomeDrawerState extends State<HomeDrawer> {
         index: DrawerIndex.HOME,
         labelName: 'Inicio',
         icon: Icon(Icons.home),
+      ),
+      DrawerList(
+        index: DrawerIndex.WhatsApp,
+        labelName: 'Soporte WhatsApp',
+        icon: const FaIcon(
+                  FontAwesomeIcons.whatsapp,
+                  color: Color(0xFF25D366),
+                  size: 20,
+                ),
       ),
       // DrawerList(
       //   index: DrawerIndex.Help,
@@ -102,6 +113,29 @@ class _HomeDrawerState extends State<HomeDrawer> {
         );
       },
     );
+  }
+
+  Future<void> navigationtoScreen(DrawerIndex indexScreen) async {
+    if (indexScreen == DrawerIndex.WhatsApp) {
+      // Configuración de WhatsApp
+      const String phoneNumber = "51942414926"; // Con código de país
+      const String message = "Necesito ayuda con el app de Optibus";
+      
+      // Codificar la URL para manejar espacios y caracteres especiales
+      final Uri whatsappUri = Uri.parse(
+        "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}"
+      );
+
+      if (await canLaunchUrl(whatsappUri)) {
+        await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+      } else {
+        // Opcional: mostrar un mensaje de error si no puede abrirlo
+        print("No se pudo abrir WhatsApp");
+      }
+    } else {
+      // Si es cualquier otro índice, sigue el flujo normal
+      widget.callBackIndex!(indexScreen);
+    }
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -427,9 +461,6 @@ class _HomeDrawerState extends State<HomeDrawer> {
     );
   }
 
-  Future<void> navigationtoScreen(DrawerIndex indexScreen) async {
-    widget.callBackIndex!(indexScreen);
-  }
 }
 
 enum DrawerIndex {
@@ -440,6 +471,7 @@ enum DrawerIndex {
   About,
   Invite,
   Testing,
+  WhatsApp,
 }
 
 class DrawerList {

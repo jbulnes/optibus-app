@@ -138,7 +138,7 @@ class _BusMapViewState extends State<BusMapView> with TickerProviderStateMixin {
             mapController: _mapController,
             options: MapOptions(
               onPositionChanged: _onMapPositionChanged,
-              initialZoom: 20.0,
+              initialZoom: 18.0,
               minZoom: 4,
               maxZoom: 20,
               initialCenter: LatLng(initialLatitudeProp, initialLongitudeProp),
@@ -265,7 +265,7 @@ class _BusMapViewState extends State<BusMapView> with TickerProviderStateMixin {
                       onTap: () {
                         if (!isSelectedMarkerBus) {
                           sheetController.animateTo(
-                            0.5,
+                            1.0,
                             duration: const Duration(milliseconds: 400),
                             curve: Curves.linear,
                           );
@@ -389,14 +389,14 @@ class _BusMapViewState extends State<BusMapView> with TickerProviderStateMixin {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      'Padron',
+                                      'Padrón / Placa:',
                                       style: TextStyle(
                                         fontSize: 16,
                                         color: Colors.white70,
                                       ),
                                     ),
                                     Text(
-                                      'PD ${busSelectProvider.codigoInterno} ',
+                                      '${busSelectProvider.codigoInterno} / ${busSelectProvider.placa}',
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
@@ -407,6 +407,83 @@ class _BusMapViewState extends State<BusMapView> with TickerProviderStateMixin {
                                 ),
                                 Divider(color: Colors.white30),
                                 SizedBox(height: 8),
+                                (busSelectProvider.imagenConductor ?? '').isNotEmpty
+                                  ? Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const Text(
+                                              'Conductor',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.white70,
+                                              ),
+                                            ),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext context) {
+                                                        return Dialog(
+                                                          child: Stack(
+                                                            children: [
+                                                              InteractiveViewer(
+                                                                child: Image.network(
+                                                                  busSelectProvider
+                                                                      .imagenConductor,
+                                                                ),
+                                                              ),
+                                                              Positioned(
+                                                                top: 8,
+                                                                right: 8,
+                                                                child: IconButton(
+                                                                  icon: const Icon(
+                                                                    Icons.close,
+                                                                    color: Colors.black,
+                                                                    size: 24,
+                                                                  ),
+                                                                  onPressed: () {
+                                                                    Navigator.of(context)
+                                                                        .pop(); // Cierra el diálogo
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      },
+                                                    );
+                                                  },
+                                                  child: CircleAvatar(
+                                                    radius: 16,
+                                                    backgroundImage: NetworkImage(
+                                                        busSelectProvider.imagenConductor),
+                                                    backgroundColor: Colors.transparent,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Text(
+                                                  busSelectProvider.nombreConductor,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    color: Colors.white70,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        Divider(color: Colors.white30),
+                                        SizedBox(height: 8),
+                                      ]
+                                    )
+                                        
+                                  : const SizedBox(),
+                                  
                               ],
                             )
                           : SizedBox(),
@@ -548,76 +625,6 @@ class _BusMapViewState extends State<BusMapView> with TickerProviderStateMixin {
                         ],
                       ),
                       const Divider(color: Colors.white30),
-
-                      (busSelectProvider.imagenConductor ?? '').isNotEmpty
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  'Conductor',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white70,
-                                  ),
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return Dialog(
-                                              child: Stack(
-                                                children: [
-                                                  InteractiveViewer(
-                                                    child: Image.network(
-                                                      busSelectProvider
-                                                          .imagenConductor,
-                                                    ),
-                                                  ),
-                                                  Positioned(
-                                                    top: 8,
-                                                    right: 8,
-                                                    child: IconButton(
-                                                      icon: const Icon(
-                                                        Icons.close,
-                                                        color: Colors.black,
-                                                        size: 24,
-                                                      ),
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop(); // Cierra el diálogo
-                                                      },
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      },
-                                      child: CircleAvatar(
-                                        radius: 16,
-                                        backgroundImage: NetworkImage(
-                                            busSelectProvider.imagenConductor),
-                                        backgroundColor: Colors.transparent,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      busSelectProvider.nombreConductor,
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.white70,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            )
-                          : const SizedBox(),
                       const SizedBox(height: 20),
                       FilledButton.tonal(
                         onPressed: () {

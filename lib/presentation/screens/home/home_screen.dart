@@ -607,7 +607,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                             ),
                                           ),
                                           Text(
-                                            'Ver mapa',
+                                            'Ver en mapa',
                                             style: TextStyle(
                                               color: isLightMode == true
                                                   ? null
