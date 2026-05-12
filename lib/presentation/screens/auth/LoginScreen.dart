@@ -27,6 +27,37 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  Future<void> _sendWhatsappWithDeviceId() async {
+    if (_userController.text.trim().isEmpty) {
+      // Mostrar alerta si el usuario no está diligenciado
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Campo requerido'),
+          content: const Text('Tiene que diligenciar el usuario para poder enviar el mensaje.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    const String phoneNumber = "51942414926";
+    final String message = "Envío mi identificador para que me habiliten el acceso.\nUsuario: ${_userController.text.trim()}\nID: $deviceId";
+    final Uri whatsappUri = Uri.parse(
+      "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}"
+    );
+    if (await canLaunchUrl(whatsappUri)) {
+      await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir WhatsApp')),
+      );
+    }
+  }
   final TextEditingController _empresaController = TextEditingController();
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -150,30 +181,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: isLightMode ? Colors.grey[600] : Colors.grey[400],
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
+                    Text(
+                      "Envíanos el identificador de dispositivo para que habiliten tu acceso al GPS",
+                      style: TextStyle(
+                        fontSize: 9,
+                        color: isLightMode ? Colors.grey[500] : Colors.grey[500],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 6),
                     Row(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Iconsax.mobile_copy, size: 14, color: const Color(0xff6456FF)),
-                        const SizedBox(width: 6),
-                        Flexible( // Para que el texto no se corte si es muy largo
-                          child: Text(
-                            deviceId,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontFamily: 'monospace',
-                              color: isLightMode ? Colors.black87 : Colors.white70,
-                            ),
-                          ),
-                        ),
+                        // Botón copiar (azul)
                         IconButton(
-                          constraints: const BoxConstraints(),
-                          padding: const EdgeInsets.only(left: 8),
-                          icon: const Icon(Icons.copy_rounded, size: 16, color: Color(0xff6456FF)),
+                          icon: const Icon(Icons.copy_rounded, color: Color(0xff6456FF)),
+                          tooltip: 'Copiar identificador',
                           onPressed: () {
                             Clipboard.setData(ClipboardData(text: deviceId));
-                            // Cerramos el modal para que el SnackBar sea visible en el fondo
-                            // o usamos el context global.
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text("ID copiado al portapapeles"),
@@ -182,6 +208,33 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             );
                           },
+                        ),
+                        // Botón WhatsApp (verde)
+                        IconButton(
+                          icon: const Icon(
+                            Iconsax.whatsapp,
+                            color: Colors.green,
+                          ),
+                          tooltip: 'Enviar por WhatsApp',
+                          onPressed: _sendWhatsappWithDeviceId,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Iconsax.mobile_copy, size: 14, color: const Color(0xff6456FF)),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            deviceId,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontFamily: 'monospace',
+                              color: isLightMode ? Colors.black87 : Colors.white70,
+                            ),
+                          ),
                         ),
                       ],
                     ),
