@@ -45,16 +45,27 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: GoogleFonts.ubuntu().fontFamily,
-        colorScheme: ColorScheme.fromSwatch(
-          // primarySwatch: Colors.purple,
-          accentColor: Colors.orange, // Aquí defines el color secundario
-          // backgroundColor: Colors.white,
+        brightness: Brightness.light,
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          secondary: Colors.orange,
+          background: Colors.white,
         ),
-        // textSelectionTheme: TextSelectionThemeData(
-        //   selectionColor: Colors.red[200],
-        //   cursorColor: Colors.pink[300],
-        // ),
       ),
+      darkTheme: ThemeData(
+        fontFamily: GoogleFonts.ubuntu().fontFamily,
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: Color(0xFF18191A),
+        colorScheme: ColorScheme.fromSwatch(brightness: Brightness.dark).copyWith(
+          secondary: Colors.orange,
+          background: Color(0xFF18191A),
+        ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white70),
+          bodySmall: TextStyle(color: Colors.white60),
+        ),
+      ),
+      themeMode: ThemeMode.system,
       builder: (BuildContext context, Widget? child) {
         return MediaQuery(
           data: MediaQuery.of(context)
