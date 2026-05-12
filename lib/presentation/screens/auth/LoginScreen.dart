@@ -125,19 +125,20 @@ class _LoginScreenState extends State<LoginScreen> {
         return AlertDialog(
           backgroundColor:
               isLightMode ? AppTheme.white : const Color(0xff18191A),
+          contentPadding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
           title: Text(
             'Configuración',
             style: TextStyle(
                 fontSize: 16, color: isLightMode ? Colors.black : Colors.white),
           ),
-          content: Column( // Cambiamos a Column para meter ambos widgets
+          content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               // 1. El Selector de URL
               SizedBox(
-                height: 120, // Ajustamos un poco la altura
+                height: 60, // Reducido para menos espacio vertical
                 child: CupertinoPicker(
-                  itemExtent: 30,
+                  itemExtent: 22, // Más compacto
                   scrollController: FixedExtentScrollController(
                     initialItem: selectedIndex,
                   ),
@@ -156,8 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   }).toList(),
                 ),
               ),
-              
-              const Divider(), // Una línea separadora para que se vea ordenado
+              const Divider(),
               const SizedBox(height: 5),
 
               // 2. El Identificador de Dispositivo dentro del Modal
