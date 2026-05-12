@@ -339,7 +339,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     "OPTIBUS",
                                     style: TextStyle(
                                       fontSize: 20,
-                                      color: Color(0xffDA2C26),
+                                      color: Colors.green,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
