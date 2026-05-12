@@ -413,9 +413,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 top: 10,
                 right: 10,
                 child: IconButton(
-                  color: brightness == Brightness.light
-                      ? Colors.black
-                      : Colors.white,
+                  color: Colors.green,
                   icon: const Icon(Icons.settings),
                   onPressed: () {
                     _showUrlDialog(context, isLightMode);
