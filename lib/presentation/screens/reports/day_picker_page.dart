@@ -244,8 +244,16 @@ class _DayPickerPageState extends State<DayPickerPage> {
     //   print("PDF file saved at $filePath");
     // }
 
-    Future<void> exportToPdf() async {
+    Future<void> exportToPdf({bool share = false}) async {
       final pdf = pw.Document();
+
+      // Obtener placa y fecha para el nombre del archivo
+      String placa = reportData.isNotEmpty ? (reportData[0]["placa"] ?? "").toString() : "reporte";
+      DateTime fecha = reportData.isNotEmpty
+          ? DateTime.parse(reportData[0]["reporte_fecha_desde"].toString())
+          : _selectedDate;
+      String fechaStr = "${fecha.day.toString().padLeft(2, '0')}${fecha.month.toString().padLeft(2, '0')}${fecha.year}";
+      String fileName = "${placa}-${fechaStr}.pdf";
 
       pdf.addPage(
         pw.Page(
@@ -259,8 +267,8 @@ class _DayPickerPageState extends State<DayPickerPage> {
                     (item) => [
                       item["placa"],
                       item["reporte_fecha_desde"].toString().substring(0, 10),
-                      item["reporte_kilometraje"].toStringAsFixed(2),
-                      item["km_vuelta"],
+                      double.tryParse(item["reporte_kilometraje"].toString())?.toStringAsFixed(2) ?? '',
+                      double.tryParse(item["nro_vueltas"].toString())?.toStringAsFixed(2) ?? '',
                     ],
                   )
                   .toList(),
@@ -271,7 +279,7 @@ class _DayPickerPageState extends State<DayPickerPage> {
 
       // Obtiene el directorio donde se guardará el archivo
       Directory directory = await getApplicationDocumentsDirectory();
-      String filePath = '${directory.path}/report.pdf';
+      String filePath = '${directory.path}/$fileName';
       File file = File(filePath);
 
       // Guarda el archivo PDF en el sistema de archivos
@@ -279,10 +287,11 @@ class _DayPickerPageState extends State<DayPickerPage> {
 
       print("PDF file saved at $filePath");
 
-      // Comparte el archivo PDF usando share_plus
-      // await Share.shareXFiles([file.path], text: '¡Mira este archivo PDF!');
-      await Share.shareXFiles([XFile(file.path)],
-          text: '¡Mira este archivo PDF!');
+      if (share) {
+        await Share.shareXFiles([XFile(file.path)], text: '¡Mira este archivo PDF!');
+      } else {
+        OpenFile.open(filePath);
+      }
     }
 
     bool isEqualsDateSelected = reportData.length > 0
@@ -371,36 +380,47 @@ class _DayPickerPageState extends State<DayPickerPage> {
                               const SizedBox(height: 16.0),
                               Center(
                                 child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
+                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                                   children: [
-                                    Center(
-                                      child: ElevatedButton.icon(
-                                        onPressed: () async {
-                                          await exportToPdf();
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          iconColor: Colors
-                                              .blueAccent, // Color de fondo del botón
-                                          surfaceTintColor:
-                                              Colors.white, // Color del texto
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                                20), // Bordes redondeados
-                                          ),
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 24,
-                                              vertical:
-                                                  12), // Padding del botón
+                                    ElevatedButton.icon(
+                                      onPressed: () async {
+                                        await exportToPdf(share: false); // Descargar
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        iconColor: Colors.blueAccent,
+                                        surfaceTintColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
                                         ),
-                                        icon: Icon(Icons.share,
-                                            size: 20), // Icono del botón
-                                        label: Text(
-                                          'Compartir',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                      ),
+                                      icon: Icon(Icons.download, size: 20),
+                                      label: Text(
+                                        'Descargar',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    ElevatedButton.icon(
+                                      onPressed: () async {
+                                        await exportToPdf(share: true); // Compartir
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        iconColor: Colors.blueAccent,
+                                        surfaceTintColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(20),
+                                        ),
+                                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                      ),
+                                      icon: Icon(Icons.share, size: 20),
+                                      label: Text(
+                                        'Compartir',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                     ),

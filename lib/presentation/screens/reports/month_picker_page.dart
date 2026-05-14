@@ -212,8 +212,16 @@ class _MonthPickerPageState extends State<MonthPickerPage> {
     //   OpenFile.open(filePath);
     //   print("PDF file saved at $filePath");
     // }
-    Future<void> exportToPdf() async {
+    Future<void> exportToPdf({bool share = false}) async {
       final pdf = pw.Document();
+
+      // Obtener placa y fechas para el nombre del archivo
+      String placa = reportData.isNotEmpty ? (reportData[0]["placa"] ?? "").toString() : "reporte";
+      DateTime fechaIni = reportData.isNotEmpty ? DateTime.parse(reportData[0]["reporte_fecha_desde"].toString()) : _selectedDate;
+      DateTime fechaFin = reportData.isNotEmpty ? DateTime.parse(reportData[0]["reporte_fecha_hasta"].toString()) : _selectedDate;
+      String fechaIniStr = "${fechaIni.day.toString().padLeft(2, '0')}${fechaIni.month.toString().padLeft(2, '0')}${fechaIni.year}";
+      String fechaFinStr = "${fechaFin.day.toString().padLeft(2, '0')}${fechaFin.month.toString().padLeft(2, '0')}${fechaFin.year}";
+      String fileName = "${placa}-${fechaIniStr}${fechaFinStr}.pdf";
 
       pdf.addPage(
         pw.Page(
@@ -226,9 +234,9 @@ class _MonthPickerPageState extends State<MonthPickerPage> {
                   .map(
                     (item) => [
                       item["placa"],
-                      item["reporte_fecha_desde"].toString().substring(0, 10),
-                      item["reporte_kilometraje"].toStringAsFixed(2),
-                      item["km_vuelta"],
+                      '${item["reporte_fecha_desde"].toString().substring(0, 10)} hasta ${item["reporte_fecha_hasta"].toString().substring(0, 10)}',
+                      double.tryParse(item["reporte_kilometraje"].toString())?.toStringAsFixed(2) ?? '',
+                      double.tryParse(item["nro_vueltas"].toString())?.toStringAsFixed(2) ?? '',
                     ],
                   )
                   .toList(),
@@ -237,20 +245,16 @@ class _MonthPickerPageState extends State<MonthPickerPage> {
         ),
       );
 
-      // Obtiene el directorio donde se guardará el archivo
       Directory directory = await getApplicationDocumentsDirectory();
-      String filePath = '${directory.path}/report.pdf';
+      String filePath = '${directory.path}/$fileName';
       File file = File(filePath);
-
-      // Guarda el archivo PDF en el sistema de archivos
       await file.writeAsBytes(await pdf.save());
-
       print("PDF file saved at $filePath");
-
-      // Comparte el archivo PDF usando share_plus
-      // await Share.shareXFiles([file.path], text: '¡Mira este archivo PDF!');
-      await Share.shareXFiles([XFile(file.path)],
-          text: '¡Mira este archivo PDF!');
+      if (share) {
+        await Share.shareXFiles([XFile(file.path)], text: '¡Mira este archivo PDF!');
+      } else {
+        OpenFile.open(filePath);
+      }
     }
 
     bool isEqualsDateSelected = reportData.length > 0
@@ -353,55 +357,50 @@ class _MonthPickerPageState extends State<MonthPickerPage> {
                                   const SizedBox(height: 16.0),
                                   Center(
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
+                                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                                       children: [
-                                        Center(
-                                          child: ElevatedButton.icon(
-                                            onPressed: () async {
-                                              await exportToPdf();
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              iconColor: Colors
-                                                  .blueAccent, // Color de fondo del botón
-                                              surfaceTintColor: Colors
-                                                  .white, // Color del texto
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        20), // Bordes redondeados
-                                              ),
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 24,
-                                                  vertical:
-                                                      12), // Padding del botón
+                                        ElevatedButton.icon(
+                                          onPressed: () async {
+                                            await exportToPdf(share: false); // Descargar
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            iconColor: Colors.blueAccent,
+                                            surfaceTintColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(20),
                                             ),
-                                            icon: Icon(Icons.share,
-                                                size: 20), // Icono del botón
-                                            label: Text(
-                                              'Compartir',
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                          ),
+                                          icon: Icon(Icons.download, size: 20),
+                                          label: Text(
+                                            'Descargar',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                         ),
-                                        // ElevatedButton(
-                                        //   onPressed: exportToExcel,
-                                        //   // child: Icon(AntDesign.file_excel_fill),
-                                        //   child: const Icon(
-                                        //     Bootstrap.file_earmark_excel_fill,
-                                        //     color: Color(0xff1F6E46),
-                                        //   ),
-                                        // ),
-                                        // ElevatedButton(
-                                        //   onPressed: exportToPdf,
-                                        //   child: const Icon(
-                                        //     Bootstrap.file_pdf_fill,
-                                        //     color: Color(0xffC40607),
-                                        //   ),
-                                        // ),
+                                        ElevatedButton.icon(
+                                          onPressed: () async {
+                                            await exportToPdf(share: true); // Compartir
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            iconColor: Colors.blueAccent,
+                                            surfaceTintColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(20),
+                                            ),
+                                            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                          ),
+                                          icon: Icon(Icons.share, size: 20),
+                                          label: Text(
+                                            'Compartir',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   )
