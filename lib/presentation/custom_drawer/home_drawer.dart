@@ -492,68 +492,140 @@ class InstructionsScreen extends StatefulWidget {
 
 class _InstructionsScreenState extends State<InstructionsScreen> {
   final String youtubeUrl = "https://www.youtube.com/watch?v=WApuhOWVu7g";
-  final Color mainBlue = Color(0xFF6456FF);
+  final Color mainBlue = const Color(0Xff4737FF);
 
-  late final WebViewController youtubeController;
-  // 2. Controlador para el PDF
-  late PdfControllerPinch pdfController;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Inicializar el controlador con el archivo de tus assets
-    pdfController = PdfControllerPinch(
-      document: PdfDocument.openAsset('assets/pdfs/manual_usuario.pdf'),
-    );
-
-    // Configuración para YouTube
-    final videoUri = Uri.parse(youtubeUrl);
-    final videoId = videoUri.queryParameters.containsKey('v') 
-        ? videoUri.queryParameters['v'] 
-        : videoUri.pathSegments.last;
-    
-    youtubeController = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36")
-      ..loadRequest(Uri.parse('https://www.youtube.com/embed/$videoId'));
-  }
-
-  @override
-  void dispose() {
-    pdfController.dispose(); // Importante limpiar el controlador
-    super.dispose();
-  }
+  // Ya no necesitamos inicializar controladores aquí para el PDF 
+  // ya que lo hacemos dinámicamente en el diálogo para evitar errores.
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Guía de Uso", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Centro de Ayuda", style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: mainBlue,
         foregroundColor: Colors.white,
+        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
+      body: SingleChildScrollView(
         child: Column(
           children: [
-            Text(
-              "¡Bienvenido!",
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: mainBlue),
+            // Header con bienvenida
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+              decoration: BoxDecoration(
+                color: mainBlue,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
+                ),
+              ),
+              child: Column(
+                children: const [
+                  Icon(Icons.auto_stories, size: 60, color: Colors.white),
+                  SizedBox(height: 16),
+                  Text(
+                    "¡Bienvenido!",
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "Aquí encontrarás todo lo necesario para dominar la plataforma.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.white70),
+                  ),
+                ],
+              ),
             ),
-            SizedBox(height: 32),
-            ElevatedButton.icon(
-              icon: Icon(Icons.picture_as_pdf, color: Colors.red),
-              label: Text("Ver Manual"),
-              onPressed: () => _showPdfDialog(context),
-            ),
-            SizedBox(height: 16),
-            ElevatedButton.icon(
-              icon: Icon(Icons.ondemand_video, color: mainBlue),
-              label: Text("Video Tutorial"),
-              onPressed: () => _showYoutubeDialog(context),
+            
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Recursos disponibles",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Opción 1: Manual PDF
+                  _buildOptionCard(
+                    context: context,
+                    title: "Manual de Usuario",
+                    subtitle: "Lee detalladamente las funciones y configuraciones en formato PDF.",
+                    icon: Icons.picture_as_pdf,
+                    iconColor: Colors.redAccent,
+                    onTap: () => _showPdfDialog(context),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Opción 2: Video Tutorial
+                  _buildOptionCard(
+                    context: context,
+                    title: "Video Tutorial",
+                    subtitle: "Aprende visualmente con un video de cómo usar la plataforma paso a paso.",
+                    icon: Icons.play_circle_fill,
+                    iconColor: mainBlue,
+                    onTap: () => _showYoutubeDialog(context),
+                  ),
+                ],
+              ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // Widget auxiliar para crear tarjetas de opciones modernas
+  Widget _buildOptionCard({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(15),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: iconColor, size: 30),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+            ],
+          ),
         ),
       ),
     );
