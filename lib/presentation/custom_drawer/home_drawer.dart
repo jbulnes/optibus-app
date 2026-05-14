@@ -11,6 +11,9 @@ import 'package:satelite_peru_mibus/data/services/mqtt_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:pdfx/pdfx.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class HomeDrawer extends StatefulWidget {
   const HomeDrawer(
@@ -42,6 +45,11 @@ class _HomeDrawerState extends State<HomeDrawer> {
         index: DrawerIndex.HOME,
         labelName: 'Inicio',
         icon: Icon(Icons.home),
+      ),
+      DrawerList(
+        index: DrawerIndex.Instructions,
+        labelName: 'Instrucciones',
+        icon: Icon(Icons.info_outline_rounded, color: Colors.deepPurple),
       ),
       DrawerList(
         index: DrawerIndex.WhatsApp,
@@ -120,20 +128,20 @@ class _HomeDrawerState extends State<HomeDrawer> {
       // Configuración de WhatsApp
       const String phoneNumber = "51942414926"; // Con código de país
       const String message = "Necesito ayuda con el app de Optibus";
-      
-      // Codificar la URL para manejar espacios y caracteres especiales
       final Uri whatsappUri = Uri.parse(
         "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}"
       );
-
       if (await canLaunchUrl(whatsappUri)) {
         await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
       } else {
-        // Opcional: mostrar un mensaje de error si no puede abrirlo
         print("No se pudo abrir WhatsApp");
       }
+    } else if (indexScreen == DrawerIndex.Instructions) {
+      // Navegar a la pantalla de instrucciones
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => InstructionsScreen()),
+      );
     } else {
-      // Si es cualquier otro índice, sigue el flujo normal
       widget.callBackIndex!(indexScreen);
     }
   }
@@ -472,6 +480,184 @@ enum DrawerIndex {
   Invite,
   Testing,
   WhatsApp,
+  Instructions,
+}
+
+
+
+class InstructionsScreen extends StatefulWidget {
+  @override
+  State<InstructionsScreen> createState() => _InstructionsScreenState();
+}
+
+class _InstructionsScreenState extends State<InstructionsScreen> {
+  final String youtubeUrl = "https://www.youtube.com/watch?v=WApuhOWVu7g";
+  final Color mainBlue = Color(0xFF6456FF);
+
+  late final WebViewController youtubeController;
+  // 2. Controlador para el PDF
+  late PdfControllerPinch pdfController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Inicializar el controlador con el archivo de tus assets
+    pdfController = PdfControllerPinch(
+      document: PdfDocument.openAsset('assets/pdfs/manual_usuario.pdf'),
+    );
+
+    // Configuración para YouTube
+    final videoUri = Uri.parse(youtubeUrl);
+    final videoId = videoUri.queryParameters.containsKey('v') 
+        ? videoUri.queryParameters['v'] 
+        : videoUri.pathSegments.last;
+    
+    youtubeController = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36")
+      ..loadRequest(Uri.parse('https://www.youtube.com/embed/$videoId'));
+  }
+
+  @override
+  void dispose() {
+    pdfController.dispose(); // Importante limpiar el controlador
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Guía de Uso", style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: mainBlue,
+        foregroundColor: Colors.white,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          children: [
+            Text(
+              "¡Bienvenido!",
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: mainBlue),
+            ),
+            SizedBox(height: 32),
+            ElevatedButton.icon(
+              icon: Icon(Icons.picture_as_pdf, color: Colors.red),
+              label: Text("Ver Manual"),
+              onPressed: () => _showPdfDialog(context),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton.icon(
+              icon: Icon(Icons.ondemand_video, color: mainBlue),
+              label: Text("Video Tutorial"),
+              onPressed: () => _showYoutubeDialog(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showPdfDialog(BuildContext context) {
+    // Creamos el controlador JUSTO ANTES de mostrar el diálogo
+    final PdfControllerPinch tempPdfController = PdfControllerPinch(
+      document: PdfDocument.openAsset('assets/pdfs/manual_usuario.pdf'),
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: EdgeInsets.all(10),
+        child: Container(
+          width: double.infinity,
+          height: MediaQuery.of(context).size.height * 0.85,
+          child: Column(
+            children: [
+              AppBar(
+                title: Text("Manual de Usuario"),
+                backgroundColor: mainBlue,
+                foregroundColor: Colors.white,
+                actions: [
+                  IconButton(
+                    icon: Icon(Icons.close), 
+                    onPressed: () {
+                      // Cerramos el controlador al cerrar el diálogo
+                      tempPdfController.dispose();
+                      Navigator.pop(context);
+                    }
+                  )
+                ],
+              ),
+              Expanded(
+                child: PdfViewPinch(
+                  controller: tempPdfController,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).then((_) {
+      // Esto asegura que si el usuario toca fuera del diálogo para cerrar,
+      // el controlador también se libere.
+      tempPdfController.dispose();
+    });
+  }
+
+  void _showYoutubeDialog(BuildContext context) {
+    // 1. Extraer el ID del video (ejemplo: WApuhOWVu7g)
+    final String videoId = YoutubePlayer.convertUrlToId(youtubeUrl)!;
+
+    // 2. Inicializar el controlador específico para YouTube
+    final YoutubePlayerController _ytController = YoutubePlayerController(
+      initialVideoId: videoId,
+      flags: const YoutubePlayerFlags(
+        autoPlay: true,
+        mute: false,
+        enableCaption: true,
+      ),
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: const EdgeInsets.all(10),
+        child: Container(
+          width: double.infinity,
+          color: Colors.black, // Fondo negro para el video
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppBar(
+                title: const Text("Video Tutorial"),
+                backgroundColor: mainBlue,
+                foregroundColor: Colors.white,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  )
+                ],
+              ),
+              // 3. El reproductor especializado
+              YoutubePlayer(
+                controller: _ytController,
+                showVideoProgressIndicator: true,
+                progressIndicatorColor: Colors.amber,
+                onReady: () {
+                  print('Reproductor listo.');
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).then((_) {
+      // 4. Liberar recursos al cerrar
+      _ytController.dispose();
+    });
+  }
 }
 
 class DrawerList {
