@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import 'package:satelite_peru_mibus/presentation/components/dialogs/custom_dialogs.dart';
 import 'package:satelite_peru_mibus/data/services/reports_service.dart';
 import 'package:satelite_peru_mibus/presentation/components/app_bar/CustomAppBar.dart';
 
@@ -34,7 +35,12 @@ class _BusMapHistorialState extends State<BusMapHistorial>
 
 // Agregar al inicio de la clase como variable de estado
   double _playbackSpeed = 1.0;
-  final List<double> _speedOptions = [1.0, 1.5, 2.0];
+  final List<double> _speedOptions = [1.0, 2.0, 5.0];
+  final List<String> _speedIcons = ['🐢', '🐇', '🐅'];
+
+  // Para el slider de progreso
+  double get _sliderValue => route.isEmpty ? 0 : _currentIndex.toDouble();
+  double get _sliderMax => route.isEmpty ? 1 : (route.length - 1).toDouble();
 
   @override
   void initState() {
@@ -76,8 +82,9 @@ class _BusMapHistorialState extends State<BusMapHistorial>
 
   void _animateCar() {
     if (_currentIndex < route.length - 1 && !_isPaused) {
-      _animationController.duration =
-          Duration(seconds: (1 / _playbackSpeed).round());
+      int millis = (1000 / _playbackSpeed).round();
+      if (millis < 100) millis = 100; // Duración mínima para evitar saltos instantáneos
+      _animationController.duration = Duration(milliseconds: millis);
       _animationController.forward(from: 0.0).then((_) {
         if (!_isPaused && _currentIndex < route.length - 1) {
           _currentIndex++;
@@ -91,13 +98,9 @@ class _BusMapHistorialState extends State<BusMapHistorial>
     }
   }
 
-  void _togglePlaybackSpeed() {
+  void _setPlaybackSpeed(double speed) {
     setState(() {
-      // Rotar entre las opciones de velocidad
-      int currentIndex = _speedOptions.indexOf(_playbackSpeed);
-      _playbackSpeed = _speedOptions[(currentIndex + 1) % _speedOptions.length];
-
-      // Si no está pausado, reiniciar la animación con la nueva velocidad
+      _playbackSpeed = speed;
       if (!_isPaused) {
         _animationController.stop();
         _animateCar();
@@ -131,39 +134,78 @@ class _BusMapHistorialState extends State<BusMapHistorial>
 
   // Modificar _buildPlayPauseButton para incluir el botón de velocidad
   Widget _buildPlayPauseControls() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        ElevatedButton.icon(
-          onPressed: () {
-            if (_isPaused) {
-              setState(() {
-                _isPaused = false;
-              });
-              _animateCar();
-            } else {
-              _pauseAnimation();
-            }
-          },
-          icon: Icon(_isPaused ? Icons.play_arrow : Icons.pause),
-          label: Text(_isPaused ? 'Reproducir' : 'Pausar'),
-        ),
-        const SizedBox(width: 10),
-        ElevatedButton(
-          onPressed: _togglePlaybackSpeed,
-          child: Text(
-            'x${_playbackSpeed.toStringAsFixed(1)}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Play/Pause
+          Material(
+            color: Colors.purple.shade700,
+            borderRadius: BorderRadius.circular(30),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(30),
+              onTap: () {
+                if (_isPaused) {
+                  setState(() {
+                    _isPaused = false;
+                  });
+                  _animateCar();
+                } else {
+                  _pauseAnimation();
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                child: Row(
+                  children: [
+                    Icon(_isPaused ? Icons.play_arrow : Icons.pause, color: Colors.white),
+                    const SizedBox(width: 6),
+                    Text(_isPaused ? 'Reproducir' : 'Pausar', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
             ),
           ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.purple.shade700,
+          const SizedBox(width: 18),
+          // Velocidades con íconos
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: List.generate(_speedOptions.length, (i) {
+                final selected = _playbackSpeed == _speedOptions[i];
+                return GestureDetector(
+                  onTap: () => _setPlaybackSpeed(_speedOptions[i]),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: selected ? Colors.purple.shade100 : Colors.transparent,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      _speedIcons[i],
+                      style: TextStyle(
+                        fontSize: 26,
+                        color: selected ? Colors.purple.shade700 : Colors.white,
+                        fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -279,23 +321,36 @@ class _BusMapHistorialState extends State<BusMapHistorial>
 
     void handleTabChange(int index) async {
       setState(() => route = []);
-      
+
       // 1. Calculamos el rango de fechas basado en el índice
       DateTime ahora = DateTime.now();
       DateTime inicio;
 
       switch (index) {
-        case 0: inicio = ahora.subtract(const Duration(minutes: 30)); break;
-        case 1: inicio = ahora.subtract(const Duration(hours: 1)); break;
-        case 2: inicio = ahora.subtract(const Duration(hours: 2)); break;
-        case 3: inicio = ahora.subtract(const Duration(hours: 7)); break;
-        case 4: inicio = DateTime(ahora.year, ahora.month, ahora.day); break; // Hoy
-        case 5: inicio = DateTime(ahora.year, ahora.month, ahora.day).subtract(const Duration(days: 1)); break; // Ayer
-        default: inicio = ahora.subtract(const Duration(minutes: 30));
+        case 0:
+          inicio = ahora.subtract(const Duration(minutes: 30));
+          break;
+        case 1:
+          inicio = ahora.subtract(const Duration(hours: 1));
+          break;
+        case 2:
+          inicio = ahora.subtract(const Duration(hours: 2));
+          break;
+        case 3:
+          inicio = ahora.subtract(const Duration(hours: 7));
+          break;
+        case 4:
+          inicio = DateTime(ahora.year, ahora.month, ahora.day);
+          break; // Hoy
+        case 5:
+          inicio = DateTime(ahora.year, ahora.month, ahora.day).subtract(const Duration(days: 1));
+          break; // Ayer
+        default:
+          inicio = ahora.subtract(const Duration(minutes: 30));
       }
 
       // Formatear a ISO 8601 (el formato que usa tu API de Vue)
-      String fechaInicio = inicio.toIso8601String().split('.')[0]; 
+      String fechaInicio = inicio.toIso8601String().split('.')[0];
       String fechaFin = ahora.toIso8601String().split('.')[0];
 
       // 2. Llamamos a la nueva función
@@ -314,6 +369,14 @@ class _BusMapHistorialState extends State<BusMapHistorial>
           _isPaused = true;
         });
         _centerMap();
+      } else {
+        // Mostrar diálogo si no hay data
+        CustomDialogs.show(
+          context,
+          type: DialogType.info,
+          title: 'Sin información',
+          message: 'No hay información a mostrar para el rango seleccionado.',
+        );
       }
     }
 
@@ -637,28 +700,52 @@ class _BusMapHistorialState extends State<BusMapHistorial>
                                   : route.isNotEmpty
                                       ? Column(
                                           children: [
-                                            // _buildPlayPauseButton(),
-                                            _buildPlayPauseControls(),
-                                            const SizedBox(height: 20),
+                                            // BARRA DE PROGRESO
                                             Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  const Text(
-                                                    'Fecha movimiento',
-                                                    style: TextStyle(
-                                                      color: Colors.white,
+                                              children: [
+                                                // Hora inicio
+                                                Text(
+                                                  eventDetailsData.isNotEmpty
+                                                      ? eventDetailsData.first['fecha'].toString().substring(11, 19)
+                                                      : '--:--:--',
+                                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                                ),
+                                                Expanded(
+                                                  child: SliderTheme(
+                                                    data: SliderTheme.of(context).copyWith(
+                                                      trackHeight: 5,
+                                                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 11),
+                                                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 18),
+                                                      activeTrackColor: Colors.purple.shade400,
+                                                      inactiveTrackColor: Colors.purple.shade100,
+                                                      thumbColor: Colors.purple.shade700,
+                                                    ),
+                                                    child: Slider(
+                                                      value: _sliderValue,
+                                                      min: 0,
+                                                      max: _sliderMax,
+                                                      onChanged: (v) {
+                                                        setState(() {
+                                                          _currentIndex = v.round();
+                                                          _currentLocation = route[_currentIndex];
+                                                          _isPaused = true;
+                                                        });
+                                                      },
                                                     ),
                                                   ),
-                                                  Text(
-                                                    '${eventDetailsData.isNotEmpty ? eventDetailsData[_currentIndex]['fecha'].toString().substring(11, 19) : ''}',
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 14,
-                                                    ),
-                                                  )
-                                                ])
+                                                ),
+                                                // Hora fin
+                                                Text(
+                                                  eventDetailsData.isNotEmpty
+                                                      ? eventDetailsData.last['fecha'].toString().substring(11, 19)
+                                                      : '--:--:--',
+                                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 10),
+                                            _buildPlayPauseControls(),
+                                            const SizedBox(height: 18),
                                           ],
                                         )
                                       : _selectedTabIndex != -1
