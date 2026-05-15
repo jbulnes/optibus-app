@@ -24,6 +24,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   String _searchQuery = '';
   TextEditingController _searchController = TextEditingController();
 
+  final ScrollController _scrollController = ScrollController();
+
   late MqttService _mqttService;
   StreamSubscription<Map<String, dynamic>>? _mqttSubscription;
 
@@ -84,6 +86,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   void dispose() {
     _mqttSubscription?.cancel();
     _mqttService.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -185,6 +188,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       child: RefreshIndicator(
                         onRefresh: _loadAutos,
                         child: ListView.builder(
+                          controller: _scrollController,
                           itemCount: filteredAutos.length,
                           itemBuilder: (context, index) {
                             final auto = filteredAutos[index];
@@ -224,6 +228,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 ],
                               ),
                               child: ExpansionTile(
+                                onExpansionChanged: (isExpanded) {
+                                  if (isExpanded) {
+                                    // Aumentamos el desplazamiento a 300 o 350 según tus pruebas
+                                    Future.delayed(const Duration(milliseconds: 300), () {
+                                      if (_scrollController.hasClients) {
+                                        _scrollController.animateTo(
+                                          index * 320.0, // Prueba con 320.0 para compensar el padding y margen
+                                          duration: const Duration(milliseconds: 600),
+                                          curve: Curves.fastOutSlowIn,
+                                        );
+                                      }
+                                    });
+                                  }
+                                },
                                 collapsedIconColor: Colors.purple,
                                 iconColor: Colors.orange,
                                 // leading: Icon(Icons.local_taxi),
