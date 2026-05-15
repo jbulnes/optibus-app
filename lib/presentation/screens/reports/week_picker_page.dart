@@ -21,6 +21,8 @@ import '../color_picker_dialog.dart';
 import '../color_selector_btn.dart';
 import '../event.dart';
 
+import 'package:satelite_peru_mibus/presentation/components/dialogs/custom_dialogs.dart';
+
 /// Page with the [WeekPicker].
 class WeekPickerPage extends StatefulWidget {
   /// Custom events.
@@ -102,64 +104,6 @@ class _WeekPickerPageState extends State<WeekPickerPage> {
       ),
     );
 
-    void _showErrorDialog(BuildContext context, {String? title, String? message}) {
-      final isDark = Theme.of(context).brightness == Brightness.dark;
-      
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: isDark ? const Color(0xFF18191A) : Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15.0),
-              side: const BorderSide(color: Color(0xff6456FF), width: 2.0),
-            ),
-            title: Center(
-              child: Text(
-                title ?? '¡Ocurrió un error!', // Título dinámico
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: <Widget>[
-                  // Cambiamos el icono a uno de información si no hay datos
-                  Icon(
-                    title == 'Atención' ? Icons.info_outline : Icons.error, 
-                    color: title == 'Atención' ? Colors.orange : Colors.red, 
-                    size: 48.0
-                  ),
-                  const SizedBox(height: 16.0),
-                  Center(
-                    child: Text(
-                      message ?? 'No se pudo obtener el reporte.', // Mensaje dinámico
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actionsAlignment: MainAxisAlignment.center,
-            actions: <Widget>[
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xff6456FF),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold)),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          );
-        },
-      );
-    }
-
     void hanldleVueltasKilometraje(BuildContext context, String placa) async {
       DateTime dateTime = DateTime.parse(_selectedDate.toString());
       String formattedDateStart = DateFormat('yyyy-MM-dd').format(dateTime);
@@ -202,10 +146,10 @@ class _WeekPickerPageState extends State<WeekPickerPage> {
       } else {
         print('No se pudo obtener el reporte.');
         _isTableVisible = false; // Ocultar la tabla si hay error
-        _showErrorDialog(
-          context, 
-          title: 'Atención', 
-          message: 'No se verifica información en la fecha indicada.'
+        CustomDialogs.show(
+          context,
+          type: DialogType.warning,
+          message: 'No se verifica información en la fecha indicada.',
         );
       }
     }

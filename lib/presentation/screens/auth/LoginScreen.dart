@@ -17,6 +17,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:satelite_peru_mibus/data/global/device_info_helper.dart'; 
 import 'package:flutter/services.dart';
 
+import 'package:satelite_peru_mibus/presentation/components/dialogs/custom_dialogs.dart';
+
 class LoginScreen extends StatefulWidget {
   static const nameScreen = "login_screen";
 
@@ -30,18 +32,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _sendWhatsappWithDeviceId() async {
     if (_userController.text.trim().isEmpty) {
       // Mostrar alerta si el usuario no está diligenciado
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Campo requerido'),
-          content: const Text('Tiene que diligenciar el usuario para poder enviar el mensaje.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
+      CustomDialogs.show(
+        context,
+        type: DialogType.warning,
+        title: 'Campo requerido',
+        message: 'Tiene que diligenciar el campo usuario para poder enviar el mensaje.',
       );
       return;
     }
